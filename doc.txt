@@ -1,0 +1,20 @@
+├─.venv/
+├─build/
+├─reportesSAFT/
+│    ├──reportes_saft/
+│    │    ├── src/
+│    │    │   ├── assets/
+│    │    │   ├── contexts/
+│    │    │   ├── database/
+│    │    │   ├── models/
+│    │    │   ├── reports/
+│    │    │   ├── repositories/
+│    │    │   ├── services
+│    │    │   ├── ui/
+│    │    │   ├── utils/
+│    │    │   ├── .env
+│    │    │   └── main.py
+│    │    ├── .gitignore
+│    │    ├── README.md
+│    └── pyproject.toml
+│
