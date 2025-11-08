@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 import flet as ft
+import time
 
 
 class UpdateService:
@@ -10,20 +11,33 @@ class UpdateService:
 
     def verificar_actualizacion(self, e):
         try:
-            updater_ui = os.path.join(os.path.dirname(
-                sys.executable), "updater", "ui_progress.exe")
+
+            base_dir = r"C:\Program Files (x86)\SAFT\reportes_py"
+            updater_ui = os.path.join(base_dir, "updater.exe")
 
             if os.path.exists(updater_ui):
-                self.page.open(ft.SnackBar(
-                    ft.Text("Iniciando actualización..."), open=True))
+                # Mostrar mensaje visual en la app
+                snackbar = ft.SnackBar(
+                    ft.Text("Iniciando actualización..."), open=True)
+                self.page.open(snackbar)
                 self.page.update()
-                subprocess.Popen([updater_ui])
+
+                # Esperar un momento para que el usuario vea el mensaje
+                time.sleep(1)
+
+                # Ejecutar el actualizador
+                subprocess.Popen([updater_ui], shell=True)
+
+                # Cerrar esta aplicación
+                self.page.window.close()  # Cierra ventana Flet
                 sys.exit(0)
             else:
-                self.page.open(ft.SnackBar(
-                    ft.Text("No se encontró el actualizador."), open=True))
+                snackbar = ft.SnackBar(
+                    ft.Text(f"⚠ No se encontró el actualizador.{updater_ui}"), open=True)
+                self.page.open(snackbar)
                 self.page.update()
+
         except Exception as ex:
-            self.page.open(ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}"), open=True))
+            snackbar = ft.SnackBar(ft.Text(f"❌ Error: {str(ex)}"), open=True)
+            self.page.open(snackbar)
             self.page.update()
