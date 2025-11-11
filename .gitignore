@@ -15,7 +15,8 @@ build/
 /build/
 dist/
 *.exe
-
+*.zip
+*.pdf
 *.pkg
 __pycache__/
 *.pyc
