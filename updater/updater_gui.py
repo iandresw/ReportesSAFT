@@ -12,7 +12,7 @@ import flet as ft
 import time
 # === CONFIGURACIÓN ===
 URL_VERSION = "https://raw.githubusercontent.com/iandresw/ReportesSAFT/master/reportes_saft/src/version.py"
-URL_ZIP = "https://raw.githubusercontent.com/iandresw/ReportesSAFT/22f4c721e4d88d0133bec3334ce8f97756e941d7/releases/latest/download/reportes_saft.zip"
+URL_ZIP = "https://drive.usercontent.google.com/download?id=1qdcEkhAj50oRiZFmVpd8r-xxSi4BYPP4&export=download&authuser=0&confirm=t&uuid=def8ece9-9390-480f-aae2-670319bc8bde&at=ALWLOp4HdS0S2XQ9A3FoGrbWnPfO%3A1762643228171"
 APP_DIR = r"C:\Program Files (x86)\SAFT\reportes_py"
 EXE_NAME = "reportes_saft.exe"
 VERSION_FILE = os.path.join(APP_DIR, "version.py")

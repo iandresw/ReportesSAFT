@@ -1,13 +1,16 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from ui.ui_style_table import table_style, columa_style
 from datetime import datetime
 
 
 class TrancicionReport:
-    def __init__(self, datos, municipio, titulo_reporte):
+    def __init__(self, datos, datos_catastro,  data_sp, municipio, titulo_reporte):
         self.datos = datos
+        self.datos_cat = datos_catastro
+        self.datos_sp = data_sp
         self.municipio = municipio
         self.titulo = titulo_reporte
 
@@ -16,7 +19,6 @@ class TrancicionReport:
         elementos = []
         estilos = getSampleStyleSheet()
 
-        # 🏛️ Encabezado del reporte
         titulo = Paragraph(
             f"<b>REPORTE DE {self.titulo} </b><br/>{self.municipio['NombreMuni']} - {self.municipio['NombreDepto']}",
             estilos["Title"],
@@ -30,13 +32,16 @@ class TrancicionReport:
         elementos.append(Spacer(1, 12))
         elementos.append(fecha)
         elementos.append(Spacer(1, 24))
-
-        # 🧮 Tabla con los datos
-        encabezados = ["Detalle", "Urbanos Inscritos",
-                       "Rurales Inscritos", "Urbanos Activos", "Rurales Activos"]
+        estilo_encabezado = columa_style()
+        estilo_tabla = table_style()
+        encabezados = [
+            Paragraph("Detalle", estilo_encabezado),
+            Paragraph("Urbanos Inscritos", estilo_encabezado),
+            Paragraph("Rurales Inscritos", estilo_encabezado),
+            Paragraph("Urbanos Activos", estilo_encabezado),
+            Paragraph("Rurales Activos", estilo_encabezado)
+        ]
         filas = [encabezados]
-
-        total = 0
         for item in self.datos:
             ins_urb = (item["Valor_ins_urb"]) if item["Valor_ins_urb"] else 0
             ins_rur = (item["Valor_ins_rur"]) if item["Valor_ins_rur"] else 0
@@ -44,38 +49,70 @@ class TrancicionReport:
             act_rur = (item["Valor_act_rur"]) if item["Valor_act_rur"] else 0
             filas.append(
                 [item["Tipo"], f"{ins_urb}", f"{ins_rur}", f"{act_urb}", f"{act_rur}"])
-
-        tabla = Table(filas, colWidths=[200, 90, 90, 90, 90])
-        tabla.setStyle(
-            TableStyle(
-                [
-                    # Encabezado
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4F81BD")),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
-
-                    # Bordes y fondo general
-                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                    ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
-                    ("BACKGROUND", (-1, -1), (-1, -1), colors.lightgrey),
-
-                    # 🔹 Alineaciones personalizadas por columna
-                    # Primera columna centrada
-                    ("ALIGN", (0, 0), (0, -1), "LEFT"),
-                    # Segunda columna a la izquierda
-                    ("ALIGN", (1, 0), (1, -1), "CENTER"),
-                    # Tercera columna a la derecha
-                    ("ALIGN", (2, 0), (2, -1), "CENTER"),
-                    # Cuarta columna a la derecha
-                    ("ALIGN", (3, 0), (3, -1), "CENTER"),
-                    # Quinta columna a la derecha
-                    ("ALIGN", (4, 0), (4, -1), "CENTER"),
-                ]
-            )
-        )
-
+        tabla = Table(filas, colWidths=[240, 80, 80, 80, 80])
+        tabla.setStyle(estilo_tabla)
         elementos.append(tabla)
+        elementos.append(Spacer(1, 20))
+
+        titulo_catastro = Paragraph(
+            f"<b>Catastro Tecnificado - Declarado:</b>",
+            estilos["Normal"],
+        )
+        elementos.append(Spacer(1, 12))
+        elementos.append(titulo_catastro)
+        elementos.append(Spacer(1, 24))
+        encabezados_cat = [
+            Paragraph("Condición de Implementación", estilo_encabezado),
+            Paragraph("Año de Inicio de Gobierno Municipal Urbano",
+                      estilo_encabezado),
+            Paragraph("Año de Final de Gobierno Municipal Urbano",
+                      estilo_encabezado),
+            Paragraph("Año de Inicio de Gobierno Municipal Rural",
+                      estilo_encabezado),
+            Paragraph("Año de Final de Gobierno Municipal Rural",
+                      estilo_encabezado)
+        ]
+        filas = [encabezados_cat]
+        for item in self.datos_cat:
+            ins_urb = (item["Valor_ins_urb"]) if item["Valor_ins_urb"] else 0
+            ins_rur = (item["Valor_ins_rur"]) if item["Valor_ins_rur"] else 0
+            act_urb = (item["Valor_act_urb"]) if item["Valor_act_urb"] else 0
+            act_rur = (item["Valor_act_rur"]) if item["Valor_act_rur"] else 0
+            # type: ignore
+            filas.append(
+                [item["Tipo"], f"{ins_urb}", f"{ins_rur}", f"{act_urb}", f"{act_rur}"])
+        tabla_cat = Table(filas, colWidths=[240, 80, 80, 80, 80])
+        tabla_cat.setStyle(estilo_tabla)
+        elementos.append(tabla_cat)
+        elementos.append(Spacer(1, 20))
+
+        titulo_sp = Paragraph(
+            f"<b>Servicios Publicos Municipales:</b>",
+            estilos["Normal"],
+        )
+        elementos.append(Spacer(1, 12))
+        elementos.append(titulo_sp)
+        elementos.append(Spacer(1, 24))
+        encabezados_sp = [
+            Paragraph("Cuenta", estilo_encabezado),
+            Paragraph("Tipos de Servicios",
+                      estilo_encabezado),
+            Paragraph("Año de Inicio de Gobierno Municipal",
+                      estilo_encabezado),
+            Paragraph("Año de Final de Gobierno Municipal", estilo_encabezado)
+        ]
+        filas = [encabezados_sp]
+        for item in self.datos_sp:
+            num_ab_inicio = (item["Valor_inicio"]
+                             ) if item["Valor_inicio"] else 0
+            num_ab_final = (item["Valor_final"]
+                            ) if item["Valor_final"] else 0
+            # type: ignore
+            filas.append([item["Tipo"], item["Cuenta"],
+                         f"{num_ab_inicio}", f"{num_ab_final}"])
+        tabla_cat = Table(filas, colWidths=[320, 80, 80, 80])
+        tabla_cat.setStyle(estilo_tabla)
+        elementos.append(tabla_cat)
         elementos.append(Spacer(1, 20))
 
         footer = Paragraph(

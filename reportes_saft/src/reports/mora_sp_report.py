@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class MoraSPReport:
-    def __init__(self, datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques, datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, municipio, titulo_reporte):
+    def __init__(self, datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques, datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucion, municipio, titulo_reporte):
         self.datos_A = datos_agua
         self.datos_B = datos_alcantarillado
         self.datos_C = datos_tren
@@ -16,6 +16,7 @@ class MoraSPReport:
         self.datos_G = datos_lim_cementerio
         self.datos_H = datos_ase_cementerio
         self.datos_I = datos_ambiente
+        self.datos_J = datos_contribucion
 
         self.municipio = municipio
         self.titulo = titulo_reporte
@@ -285,6 +286,33 @@ class MoraSPReport:
             tabla_I = Table(filas, colWidths=[90, 300, 100])
             tabla_I.setStyle(stylo_table)
             elementos.append(tabla_I)
+
+        elementos.append(Spacer(1, 20))
+
+        # DATOS TABLA DE TASA AMBIENTAL
+        if self.datos_J:
+            subtitulo_J = Paragraph(
+                f"<b>Contribución por Mejoras</b>",
+                estilos["Normal"],
+            )
+            elementos.append(Spacer(1, 12))
+            elementos.append(subtitulo_J)
+            elementos.append(Spacer(1, 24))
+
+            encabezados = ["Cuenta", "Descripcion", "Monto (L)"]
+            filas = [encabezados]
+
+            sub_total = 0
+            for item in self.datos_J:
+                monto = (item["Valor"]) if item["Valor"] else 0
+                filas.append([item["Cuenta"], item["Tipo"], f"{monto:,.2f}"])
+                total += monto
+                sub_total += monto
+            filas.append(["", "SUB-TOTAL", f"{sub_total:,.2f}"])
+            filas.append(["", "TOTAL", f"{total:,.2f}"])
+            tabla_J = Table(filas, colWidths=[90, 300, 100])
+            tabla_J.setStyle(stylo_table)
+            elementos.append(tabla_J)
 
         elementos.append(Spacer(1, 20))
 

@@ -20,6 +20,7 @@ class MoraSPService:
         cta_limpieza_cementerio = '125990213'
         cta_aseo_cementerio = '125990109'
         cta_ambiente = '125990105'
+        cta_contribucion = '223101010'
         contado = 0
         datos_agua = []
         datos_alcantarillado = []
@@ -30,6 +31,7 @@ class MoraSPService:
         datos_lim_cementerio = []
         datos_ase_cementerio = []
         datos_ambiente = []
+        datos_contribucuion = []
 
         data_cta_agua = self.repo_cta_ingreso.obtener_cta_sp(cta_agua)
         data_cta_alcantarillado = self.repo_cta_ingreso.obtener_cta_sp(
@@ -46,6 +48,8 @@ class MoraSPService:
         data_cta_aseo_cemenetrio = self.repo_cta_ingreso.obtener_cta_sp(
             cta_aseo_cementerio)
         data_cta_ambiente = self.repo_cta_ingreso.obtener_cta_sp(cta_ambiente)
+        data_cta_contribucion = self.repo_cta_ingreso.obtener_cta_sp(
+            cta_contribucion)
 # MORA AGUA
         mora_agua = self.repo_factura.obtener_mora_sp(cta_agua)
         for mora in mora_agua:
@@ -407,7 +411,46 @@ class MoraSPService:
                         'Cuenta': mora['CtaIngreso'],
                         'Tipo': mora['NombreCtaIngreso'],
                         'Valor': mora['valor']})
+# MORA CONTRIBUCION
+        mora_contribucion = self.repo_factura.obtener_mora_sp(cta_contribucion)
+        for mora in mora_contribucion:
+            contado += 1
+            datos_contribucuion.append({
+                'Cuenta': mora['CtaIngreso'],
+                'Tipo': mora['NombreCtaIngreso'],
+                'Valor': mora['valor']
+            })
+        if data_cta_contribucion:
+            if not data_cta_contribucion['CtaRecuperacion'] == '':
+                mora_contribucion = self.repo_factura.obtener_mora_sp(
+                    data_cta_contribucion['CtaRecuperacion'])
+                for mora in mora_contribucion:
+                    contado += 1
+                    datos_contribucuion.append({
+                        'Cuenta': mora['CtaIngreso'],
+                        'Tipo': mora['NombreCtaIngreso'],
+                        'Valor': mora['valor']
+                    })
+            if not data_cta_contribucion['CtaInteres'] == '':
+                mora_contribucion = self.repo_factura.obtener_mora_sp(
+                    data_cta_contribucion['CtaInteres'])
+                for mora in mora_contribucion:
+                    contado += 1
+                    datos_contribucuion.append({
+                        'Cuenta': mora['CtaIngreso'],
+                        'Tipo': mora['NombreCtaIngreso'],
+                        'Valor': mora['valor']
+                    })
+            if not data_cta_contribucion['CtaRecargos'] == '':
+                mora_contribucion = self.repo_factura.obtener_mora_sp(
+                    data_cta_contribucion['CtaRecargos'])
+                for mora in mora_contribucion:
+                    contado += 1
+                    datos_contribucuion.append({
+                        'Cuenta': mora['CtaIngreso'],
+                        'Tipo': mora['NombreCtaIngreso'],
+                        'Valor': mora['valor']})
 
         if not contado != 0:
             raise ValueError("No se encontraron datos de mora de sp.")
-        return datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques, datos_lim_cementerio, datos_ase_cementerio, datos_ambiente,
+        return datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques, datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucuion

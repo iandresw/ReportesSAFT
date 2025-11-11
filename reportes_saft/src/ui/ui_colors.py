@@ -10,8 +10,20 @@ def color_texto():
 
 
 def color_bg():
-    return '#272c36'
+    return '#0d1b2a'
+
+
+def color_bg_2():
+    return "#1b263b"
 
 
 def color_shadow():
     return '#E06C75'
+
+
+def color_border_contenedor():
+    return '#E06C75'
+
+
+def container_color():
+    return '#362357'

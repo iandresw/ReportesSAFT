@@ -61,3 +61,67 @@ class TrancicionBIRepository:
                 return None
             columns = [column[0] for column in cur.description]
             return dict(zip(columns, row))
+
+    def obtener_tec_anio_inicio(self, ubicacion: int, anio_inicio_periodo: int):
+        query = """
+                SELECT COUNT(DISTINCT Catastro.ClaveCatastro) AS Total
+                FROM  Catastro INNER JOIN
+                F_FichaUrb ON Catastro.ClaveCatastro = F_FichaUrb.ClaveCatastro
+                WHERE (Catastro.Ubicacion = ?) AND (DATEPART(year, F_FichaUrb.FechaAvaluo) < ?)
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (ubicacion, anio_inicio_periodo))
+            row = cur.fetchone()
+            if not row:
+                return None
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_tec_anio_fin(self, ubicacion: int, anio_inicio_periodo: int):
+        query = """
+                SELECT COUNT(DISTINCT Catastro.ClaveCatastro) AS Total
+                FROM  Catastro INNER JOIN
+                F_FichaUrb ON Catastro.ClaveCatastro = F_FichaUrb.ClaveCatastro
+                WHERE (Catastro.Ubicacion = ?) 
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (ubicacion))
+            row = cur.fetchone()
+            if not row:
+                return None
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_dec_anio_inicio(self, ubicacion: int, anio_inicio_periodo: int):
+        query = """
+                SELECT COUNT(DISTINCT Catastro.ClaveCatastro) AS Total
+                FROM  Catastro INNER JOIN
+                DeclaraBI ON Catastro.ClaveCatastro = DeclaraBI.ClaveCatastro
+                WHERE (Catastro.Ubicacion = ?) AND (DATEPART(year, DeclaraBI.FechaDeclaraBI) < ?) AND (Catastro.ClaveCatastro NOT IN
+                             (SELECT        ClaveCatastro
+                               FROM            F_FichaUrb))
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (ubicacion, anio_inicio_periodo))
+            row = cur.fetchone()
+            if not row:
+                return None
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
+
+    def obtener_dec_anio_fin(self, ubicacion: int, anio_inicio_periodo: int):
+        query = """
+SELECT COUNT(DISTINCT Catastro.ClaveCatastro) AS Total
+FROM  Catastro INNER JOIN
+DeclaraBI ON Catastro.ClaveCatastro = DeclaraBI.ClaveCatastro
+WHERE (Catastro.Ubicacion = ?) AND (Catastro.ClaveCatastro NOT IN
+                             (SELECT        ClaveCatastro
+                               FROM            F_FichaUrb))
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (ubicacion, ))
+            row = cur.fetchone()
+            if not row:
+                return None
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))
