@@ -1,6 +1,9 @@
 ├─.venv/
 ├─build/
 ├─reportesSAFT/
+│    ├──updater/
+│    │    ├── updater_gui.py
+│    │    ├── updater.exe
 │    ├──reportes_saft/
 │    │    ├── src/
 │    │    │   ├── assets/
