@@ -2,13 +2,11 @@ import os
 import webbrowser
 import flet as ft
 from models.tra_permop import Tra_PermOpe
-from ui.ui_colors import color_bg, color_bg_2
-from ui.ui_btn_actualizar import create_update_button
+from ui.ui_colors import color_bg, color_bg_2, color_texto, color_texto_2, color_texto_parrafo
 from ui.ui_alertas import AlertaGeneral
 from ui.ui_botones import create_boton
-from ui.ui_text import text_mensaje, create_texFiel_fijas
-from ui.ui_container import container_titulo, create_container
-from version import APP_VERSION
+from ui.ui_text import create_texFiel_fijas
+from ui.ui_container import create_container
 from services.parametro_service import ParametroService
 from services.permiso_operacion_services import PermisooperacionServices
 from reports.permiso_operacion_report import PermisoOperacionReport
@@ -20,6 +18,11 @@ class VistaPermisoOperacion:
         self.app = context
         self.app.init_saft()
         self.ft = ft
+        self.bg_color = color_bg()
+        self.bg_2_color = color_bg_2()
+        self.texto_color = color_texto()
+        self.texto_color_2 = color_texto_2()
+        self.color_parrafo = color_texto_parrafo()
 
         self.parametro_service = ParametroService(self.app.conexion_saft)
         self.datos_muni = self.parametro_service.obtener_datos_municipalidad()
@@ -35,8 +38,7 @@ class VistaPermisoOperacion:
             "Guardar", width=130, disabled=True, on_click=self.guardar_recibo_po)
         self.btn_imprimir = create_boton(
             "Imprimir", width=130, disabled=True, on_click=self.imprimir_rept_po)
-        self.btn_editar = create_boton(
-            "Editar", width=130, disabled=True)
+        self.btn_editar = create_boton("Editar", width=130, disabled=True)
         # CAJAS DE TEXTO
         self.txt_no_recibo = create_texFiel_fijas(
             'No. de Recibo', width=95, read_only=False)
@@ -78,6 +80,7 @@ class VistaPermisoOperacion:
                             "PERMISO DE OPERACION DE NEGOCIOS",
                             size=24,
                             weight=self.ft.FontWeight.BOLD,
+                            color=self.texto_color,
                             text_align=self.ft.TextAlign.CENTER,
                         ),
                         ft.Divider(),
@@ -180,29 +183,28 @@ class VistaPermisoOperacion:
         self.txt_tipo_establecimiento.value = ""
         if not existe:
             self.btn_guardar.disabled = False
-            self.btn_guardar.style.bgcolor = color_bg()
+            self.btn_guardar.style.bgcolor = self.bg_color
             self.btn_guardar.update()
-            self.btn_imprimir.style.bgcolor = color_bg_2()
+            self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = True
             self.btn_imprimir.update()
 
         else:
             self.btn_guardar.disabled = True
             self.btn_guardar.update()
-            self.btn_guardar.style.bgcolor = color_bg_2()
+            self.btn_guardar.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = color_bg()
+            self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
         self.page.update()
 
     def guardar_recibo_po(self, e):
         if self.repo_permiso.guardar_perm_operacion(self.permiso):
             self.btn_guardar.disabled = True
-            self.btn_guardar.style.bgcolor = color_bg_2()
+            self.btn_guardar.style.bgcolor = self.bg_2_color
             self.btn_guardar.update()
-
             self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = color_bg()
+            self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             self.page.update()
 
@@ -215,16 +217,17 @@ class VistaPermisoOperacion:
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
             # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
+            fila_nack_bar = ft.Row([ft.ProgressRing(height=20, width=20), ft.Text(
+                f"Reporte generado: {nombre_archivo}", size=14)])
+            self.page.open(self.ft.SnackBar(fila_nack_bar,
+                                            bgcolor=ft.Colors.GREEN_700, duration=20
+                                            ))
             self.btn_guardar.disabled = False
-            self.btn_guardar.style.bgcolor = color_bg()
+            self.btn_guardar.style.bgcolor = self.bg_color
             self.btn_guardar.update()
 
             self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = color_bg()
+            self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             self.page.update()
 
@@ -234,10 +237,10 @@ class VistaPermisoOperacion:
                 bgcolor=ft.Colors.RED_700,
             ))
             self.btn_guardar.disabled = False
-            self.btn_guardar.style.bgcolor = color_bg()
+            self.btn_guardar.style.bgcolor = self.bg_color
             self.btn_guardar.update()
 
             self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = color_bg()
+            self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             self.page.update()

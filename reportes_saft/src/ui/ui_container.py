@@ -1,5 +1,5 @@
 from flet import (Container, Animation, AnimationCurve, TextStyle, Offset,   alignment,  # type: ignore
-                  Column, BoxShadow, Text, Colors, MainAxisAlignment, ScrollMode, Row, Icon, Border, BorderSide, ShadowBlurStyle)
+                  Column, BoxShadow, Text, Colors, CrossAxisAlignment, MainAxisAlignment, ScrollMode, Row, Icon, Border, BorderSide, ShadowBlurStyle)
 
 from ui.ui_colors import color_border_contenedor, color_bg, container_color, color_shadow, color_bg_2, color_texto
 
@@ -7,12 +7,17 @@ from ui.ui_colors import color_border_contenedor, color_bg, container_color, col
 animation_style = Animation(500, AnimationCurve.EASE_IN_TO_LINEAR)
 
 
-def create_container(controls=[], col=1, width=100, height=1000, expand=True, content=None):
+def create_container(controls=[], col=1, width=100, height=1000, expand=True, content=None, alineacion_col=None) -> Container:
     if content:
         content = content
     else:
-        content = Column(controls=controls, scroll=ScrollMode.AUTO,
-                         col=12, alignment=MainAxisAlignment.START)
+        content = Column(controls=controls,
+                         scroll=ScrollMode.AUTO,
+                         col=12,
+                         alignment=MainAxisAlignment.CENTER,         # centra verticalmente
+                         horizontal_alignment=CrossAxisAlignment.CENTER,  # centra horizontalmente
+
+                         expand=True)
     return Container(
         bgcolor=color_bg_2(),
         # alignment=alignment.center,

@@ -37,7 +37,14 @@ class PermisooperacionServices:
                                       rtn=datos['rtn'],
                                       Telefono=datos['Telefono'])
         else:
+            observ = "Apertura"
+
             datos = self.repo.obtener_datos(num_recibo=num_recibo)
+            inicio_operacion = datos['FechaNac']
+            if isinstance(inicio_operacion, datetime):
+                anio = inicio_operacion.year
+                if anio == datos['Periodo']:
+                    observ = "Renovacion"
             num_permiso = self.repo.obtener_num_po()
             permiso = Tra_PermOpe(NumRecibo=datos['NumRecibo'],
                                   Identidad=datos['Identidad'],
@@ -49,7 +56,7 @@ class PermisooperacionServices:
                                   Propietario=f"{datos['Pnombre']} {datos['SNombre']} {datos['PApellido']} {datos['SApellido']}",
                                   Ubicacion=datos['Direccion'],
                                   Actividad=datos['NombreCtaIngreso'],
-                                  Observacion="2",
+                                  Observacion=observ,
                                   Fecha=datetime.now(),
                                   CodAldea="",
                                   Usuario="",

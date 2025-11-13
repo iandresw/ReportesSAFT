@@ -1,17 +1,20 @@
 import flet as ft
+
 from contexts.app_context import AppContext
 from views.permiso_operacion_view import VistaPermisoOperacion
 from ui.ui_container import create_container_rail
 from views.about_view import VistaAbout
 from views.reportes_view import VistaReportes
 from ui.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
-
 from services.parametro_service import ParametroService
 
 
 def main(page: ft.Page):
     context = AppContext()
     text_color = color_texto()
+    bg_color = color_bg()
+    bg_2_color = color_bg_2()
+    shadow_color = color_shadow()
     context.init_saft()
     parametro_service = ParametroService(context.conexion_saft)
     datos_muni = parametro_service.obtener_datos_municipalidad()
@@ -27,10 +30,12 @@ def main(page: ft.Page):
     page.window.min_height = x_height
     page.window.max_width = x_width
     page.window.min_width = x_width
+    municipalidad = datos_muni['NombreMuni'].rstrip().replace(
+        "Municipalidad de", "")
 
     # --- Título superior ---
     titulo_muni = ft.Text(
-        f"{datos_muni['NombreMuni']} - {datos_muni['NombreDepto']}",
+        f"Municipalidad de {municipalidad} - {datos_muni['NombreDepto'].replace(" ", "")}",
         size=24,
         weight=ft.FontWeight.BOLD,
         text_align=ft.TextAlign.CENTER,
@@ -53,9 +58,9 @@ def main(page: ft.Page):
         index = e.control.selected_index
         if index == 0:
             main_content.content = view_reportes
-        elif index == 2:
-            main_content.content = view_permiso_operacion
         elif index == 1:
+            main_content.content = view_permiso_operacion
+        elif index == 2:
             main_content.content = view_about
         page.update()
 
@@ -64,34 +69,42 @@ def main(page: ft.Page):
         selected_index=0,
         label_type=ft.NavigationRailLabelType.ALL,
         min_width=100,
-        indicator_color=color_bg(),
+        indicator_color=bg_color,
         indicator_shape=ft.RoundedRectangleBorder(radius=5),
         selected_label_text_style=ft.TextStyle(),
-        bgcolor=color_bg_2(),
+        bgcolor=bg_2_color,
         leading=ft.Image(src="/saft.png", width=50),
         group_alignment=-0.9,
         destinations=[
             ft.NavigationRailDestination(
-                icon=ft.Icons.VIEW_COMFORTABLE_OUTLINED,
-
-                selected_icon=ft.Icons.VIEW_COMFORTABLE_ROUNDED,
-                label_content=ft.Text("Reportes",  color=text_color),
-                indicator_color=color_shadow(),
+                icon=ft.Icon(ft.Icons.VIEW_COMFORTABLE_OUTLINED,
+                             color=text_color, size=20),
+                selected_icon=ft.Icon(
+                    ft.Icons.VIEW_COMFORTABLE_ROUNDED, color=text_color, size=20),
+                label_content=ft.Text(
+                    "Reportes",  color=text_color, size=11, text_align=ft.TextAlign.CENTER),
+                indicator_color=shadow_color,
             ),
             ft.NavigationRailDestination(
-                icon=ft.Icons.ARCHIVE_OUTLINED,
-                selected_icon=ft.Icons.ARCHIVE_ROUNDED,
-                label_content=ft.Text("P.O.", color=text_color),
-                indicator_color=color_shadow(),
+                icon=ft.Icon(ft.Icons.ADD_HOME_WORK_OUTLINED,
+                             color=text_color, size=20),
+                selected_icon=ft.Icon(
+                    ft.Icons.ADD_HOME_WORK_ROUNDED, color=text_color, size=20),
+                label_content=ft.Text(
+                    "Permiso Operación.", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
+                indicator_color=shadow_color,
             ),
             ft.NavigationRailDestination(
-                icon=ft.Icons.ARCHIVE_OUTLINED,
-                selected_icon=ft.Icons.ARCHIVE_ROUNDED,
-                label_content=ft.Text("Acerca De", color=text_color),
-                indicator_color=color_shadow(),
+                icon=ft.Icon(ft.Icons.ARCHIVE_OUTLINED,
+                             color=text_color, size=20),
+                selected_icon=ft.Icon(
+                    ft.Icons.ARCHIVE_ROUNDED, color=text_color, size=20),
+                label_content=ft.Text(
+                    "Acerca De", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
+                indicator_color=shadow_color,
             ),
         ],
-        on_change=on_nav_change,  # ← aquí cambiamos la vista
+        on_change=on_nav_change,
     )
 
     con_rail = create_container_rail(
@@ -99,7 +112,7 @@ def main(page: ft.Page):
         expand=False
     )
     # --- Fondo principal ---
-    page.bgcolor = color_bg()
+    page.bgcolor = bg_color
 
     # --- Layout general ---
     page.add(

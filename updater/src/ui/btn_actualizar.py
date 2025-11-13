@@ -7,6 +7,7 @@ def create_update_button() -> ft.ElevatedButton:
         icon=ft.Icons.SYSTEM_UPDATE,
         color=ft.Colors.BLUE_700,
         width=200,
+        height=35,
         style=ft.ButtonStyle(
             side=ft.BorderSide(2, ft.Colors.BLUE_700),
             bgcolor='#1b263b',

@@ -9,6 +9,14 @@ def color_texto():
     return "#E5C07B"
 
 
+def color_texto_2():
+    return Colors.BLUE_400
+
+
+def color_texto_parrafo():
+    return Colors.GREY_700
+
+
 def color_bg():
     return '#0d1b2a'
 
