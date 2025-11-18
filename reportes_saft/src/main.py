@@ -20,16 +20,18 @@ def main(page: ft.Page):
     datos_muni = parametro_service.obtener_datos_municipalidad()
     datos_system = parametro_service.obtener_datos_systema()
     # --- Configuración ventana ---
-    page.window.maximizable = False
-    page.window.resizable = False
-    x_height = 680
-    x_width = 600
-    page.window.width = x_width
-    page.window.height = x_height
-    page.window.max_height = x_height
-    page.window.min_height = x_height
-    page.window.max_width = x_width
-    page.window.min_width = x_width
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    # page.window.maximizable = True
+    # page.window.resizable = False
+    # x_height = 680
+    # x_width = 600
+    # page.window.width = x_width
+    # page.window.height = x_height
+    # page.window.max_height = x_height
+    # page.window.min_height = x_height
+    # page.window.max_width = x_width
+    # page.window.min_width = x_width
     municipalidad = datos_muni['NombreMuni'].rstrip().replace(
         "Municipalidad de", "")
 

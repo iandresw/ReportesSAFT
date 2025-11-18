@@ -12,8 +12,8 @@ dependencies = [
   "pyodbc",
   "reportlab",
   "python-dotenv",
-  "requests"
-  
+  "requests",
+  "qrcode"
 ]
 
 [tool.flet]

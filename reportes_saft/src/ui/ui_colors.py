@@ -35,3 +35,11 @@ def color_border_contenedor():
 
 def container_color():
     return '#362357'
+
+
+def color_fill_chek():
+    return '#011627'
+
+
+def color_check():
+    return '#415a77'

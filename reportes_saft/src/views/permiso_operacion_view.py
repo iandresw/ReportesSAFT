@@ -2,14 +2,17 @@ import os
 import webbrowser
 import flet as ft
 from models.tra_permop import Tra_PermOpe
-from ui.ui_colors import color_bg, color_bg_2, color_texto, color_texto_2, color_texto_parrafo
 from ui.ui_alertas import AlertaGeneral
+from ui.ui_checkBox import createCheckBox
+from ui.ui_colors import color_bg, color_bg_2, color_texto, color_texto_2, color_texto_parrafo
+from ui.ui_radio import create_radio
 from ui.ui_botones import create_boton
 from ui.ui_text import create_texFiel_fijas
 from ui.ui_container import create_container
 from services.parametro_service import ParametroService
 from services.permiso_operacion_services import PermisooperacionServices
 from reports.permiso_operacion_report import PermisoOperacionReport
+from reports.per_ope_la_esperanza import PerOpeLaEsperanzaReport
 
 
 class VistaPermisoOperacion:
@@ -29,45 +32,60 @@ class VistaPermisoOperacion:
         self.datos_system = self.parametro_service.obtener_datos_systema()
         self.repo_permiso = PermisooperacionServices(
             self.app.conexion_saft, self.datos_system)
+
+        self.chk_firma_justicia = createCheckBox("¿Firma Justicia?")
+
+        self.rd_tipo_solcitud = ft.RadioGroup(disabled=True, content=ft.Row(
+            [create_radio(value="Apertura", label_text="Apertura"),
+             create_radio(value="Renovacion", label_text="Renovación")],),
+        )
+        # ALERTAS
+        self.alert_recibo = AlertaGeneral(
+            titulo=ft.Text("Permiso de Operación"),
+            contenido=ft.Text(
+                "¡No se encontro Informacion para el numero de recibo ingresado!"),
+            actions=[ft.OutlinedButton("Aceptar", on_click=self.acetar_reg),],)
         # BOTONES
-        self.permiso: Tra_PermOpe
+        self.permiso: Tra_PermOpe | None
 
         self.btn_consulta = create_boton(
             "Consulta", on_click=self.consultar_recibo)
         self.btn_guardar = create_boton(
-            "Guardar", width=130, disabled=True, on_click=self.guardar_recibo_po)
+            "Guardar",
+            width=130,
+            disabled=True,
+            on_click=self.guardar_recibo_po)
         self.btn_imprimir = create_boton(
-            "Imprimir", width=130, disabled=True, on_click=self.imprimir_rept_po)
+            "Imprimir",
+            width=130,
+            disabled=True,
+            on_click=self.imprimir_rept_po)
         self.btn_editar = create_boton("Editar", width=130, disabled=True)
         # CAJAS DE TEXTO
         self.txt_no_recibo = create_texFiel_fijas(
             'No. de Recibo', width=95, read_only=False)
-        self.txt_no_permiso = create_texFiel_fijas('No. de Permiso', width=95)
-        self.txt_periodo = create_texFiel_fijas('Periodo', width=95)
-        self.txt_ini_operaion = create_texFiel_fijas(
-            'Inicio Operacion', width=95)
-        self.txt_telefono = create_texFiel_fijas('Telefono', width=95)
-        self.txt_rtn = create_texFiel_fijas('R.T.N', width=130)
-        self.txt_rtm = create_texFiel_fijas('R.T.M.', width=130)
-        self.txt_fecha_emission = create_texFiel_fijas(
-            'Fecha Emision', width=130)
+        self.txt_no_permiso = create_texFiel_fijas('No. de Permiso')
+        self.txt_periodo = create_texFiel_fijas('Periodo',)
+        self.txt_ini_operaion = create_texFiel_fijas('Inicio Operacion')
+        self.txt_telefono = create_texFiel_fijas('Telefono')
+        self.txt_num_renovacion = create_texFiel_fijas('Numero de Renovacion')
+        self.txt_rtn = create_texFiel_fijas('R.T.N')
+        self.txt_rtm = create_texFiel_fijas('R.T.M.')
+        self.txt_fecha_emission = create_texFiel_fijas('Fecha Emision')
         self.txt_nombre_establecimiento = create_texFiel_fijas(
-            'Nombre del Establecimiento', width=420)
+            'Nombre del Establecimiento')
         self.txt_nombrePropietario = create_texFiel_fijas(
-            'Nombre del Propietario', width=305)
-        self.txt_identidad = create_texFiel_fijas(
-            'Identidad del Propietario', width=105)
-        self.txt_ubicacion = create_texFiel_fijas('Direccion', width=305)
-        self.txt_claveCatastral = create_texFiel_fijas(
-            'Clave Catastral', width=105)
-        self.txt_act_economica = create_texFiel_fijas(
-            'Actividad Economica', width=205)
+            'Nombre del Propietario')
+        self.txt_identidad = create_texFiel_fijas('Identidad del Propietario')
+        self.txt_ubicacion = create_texFiel_fijas('Direccion')
+        self.txt_claveCatastral = create_texFiel_fijas('Clave Catastral')
+        self.txt_act_economica = create_texFiel_fijas('Actividad Economica')
         self.txt_tipo_establecimiento = create_texFiel_fijas(
-            'Tipo Establecimiento', width=205)
+            'Tipo Establecimiento')
 
         self.conten_acerca_de = create_container(
             expand=True,
-            height=580,
+            # height=580,
             col=12,
             controls=[
                 ft.Column(
@@ -98,7 +116,8 @@ class VistaPermisoOperacion:
                             controls=[self.txt_no_permiso,
                                       self.txt_periodo,
                                       self.txt_ini_operaion,
-                                      self.txt_telefono
+                                      self.txt_telefono,
+                                      self.txt_num_renovacion
                                       ],
                         ),
 
@@ -138,6 +157,15 @@ class VistaPermisoOperacion:
                         ft.Divider(),
                         ft.Row(
                             alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                            controls=[
+                                self.chk_firma_justicia,
+                                ft.Divider(),
+                                self.rd_tipo_solcitud,
+                            ],
+                        ),
+                        ft.Divider(),
+                        ft.Row(
+                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
                             controls=[self.btn_guardar, self.btn_editar, self.btn_imprimir
                                       ],
                         ),
@@ -161,11 +189,20 @@ class VistaPermisoOperacion:
             self.frame
         ])
 
+    def acetar_reg(self, e):
+        self.alert_recibo.open = False
+        self.alert_recibo.update()
+
     def consultar_recibo(self, e):
         num_recibo = self.txt_no_recibo.value
         existe = self.repo_permiso.existe_po(num_recibo)
+        justicia = self.chk_firma_justicia.value
+        tipo_per = self.rd_tipo_solcitud.value
         self.permiso = self.repo_permiso.crear_permiso_operacion(
-            int(num_recibo))
+            int(num_recibo), justicia, tipo_per)  # type: ignore
+        if not self.permiso:
+            self.page.open(self.alert_recibo)
+            return None
         self.txt_no_permiso.value = str(self.permiso.NoPermiso)
         self.txt_periodo.value = str(self.permiso.Periodo)
         self.txt_ini_operaion.value = self.permiso.FechaNac.strftime(
@@ -180,7 +217,11 @@ class VistaPermisoOperacion:
         self.txt_claveCatastral.value = self.permiso.ClaveCatastro
         self.txt_ubicacion.value = self.permiso.Ubicacion
         self.txt_act_economica.value = self.permiso.Actividad
-        self.txt_tipo_establecimiento.value = ""
+        self.txt_tipo_establecimiento.value = self.permiso.CodProfesion
+        self.rd_tipo_solcitud.value = self.permiso.Observacion
+        self.txt_num_renovacion.value = self.permiso.NumeroRenovacion
+        self.rd_tipo_solcitud.update()
+
         if not existe:
             self.btn_guardar.disabled = False
             self.btn_guardar.style.bgcolor = self.bg_color
@@ -188,6 +229,9 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = True
             self.btn_imprimir.update()
+            self.chk_firma_justicia.disabled = False
+            self.chk_firma_justicia.update()
+            self.rd_tipo_solcitud.update()
 
         else:
             self.btn_guardar.disabled = True
@@ -196,6 +240,10 @@ class VistaPermisoOperacion:
             self.btn_imprimir.disabled = False
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
+
+            self.chk_firma_justicia.value = bool(self.permiso.FirmaJ)
+            self.chk_firma_justicia.disabled = True
+            self.chk_firma_justicia.update()
         self.page.update()
 
     def guardar_recibo_po(self, e):
@@ -210,7 +258,13 @@ class VistaPermisoOperacion:
 
     def imprimir_rept_po(self, e):
         try:
-            reporte = PermisoOperacionReport(self.permiso, self.datos_muni, "")
+            justicia = self.chk_firma_justicia.value
+            if self.datos_muni["CodMuni"] == "0512":
+                reporte = PerOpeLaEsperanzaReport(
+                    self.permiso, self.datos_muni, "", justicia)
+            else:
+                reporte = PermisoOperacionReport(
+                    self.permiso, self.datos_muni, "", justicia)
             nombre_archivo = "po_report.pdf"
             ruta = os.path.join(os.getcwd(), nombre_archivo)
 

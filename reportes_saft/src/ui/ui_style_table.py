@@ -120,6 +120,76 @@ def estilos_parrafo():
         spaceBefore=5,
         spaceAfter=5
     ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_title',
+        fontSize=14,
+        textColor=colors.black,
+        fontName="Arial-Rounded-MT-Bold",
+        leading=15,
+        alignment=1,  # justificado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_campos',
+        fontSize=12,
+        textColor=colors.black,
+        fontName="Arial-Rounded-MT-Bold",
+        leading=15,
+        alignment=0,  # justificado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_telefono',
+        fontSize=12,
+        textColor="#153D63",
+        fontName="Arial-Unicode-MS",
+        leading=15,
+        alignment=1,  # justificado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_title_ope',
+        fontSize=24,
+        textColor="#C8A832",
+        fontName="Britannic-Bold",
+        leading=15,
+        alignment=1,  # justificado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_num_ope',
+        fontSize=28,
+        textColor="#FFFFFF",
+        fontName="Britannic-Bold",
+        leading=20,
+        alignment=0,  # justificado
+        spaceBefore=0,
+        spaceAfter=10
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_parrafo',
+        fontSize=9,
+        textColor=colors.black,
+        fontName="Britannic-Bold",
+        leading=10,
+        alignment=0,  # justificado
+        spaceBefore=0,
+        spaceAfter=10
+    ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_campos_firma',
+        fontSize=9,
+        textColor=colors.black,
+        fontName="Arial-Rounded-MT-Bold",
+        leading=0,
+        alignment=1,  # justificado
+        spaceBefore=0,
+        spaceAfter=5
+    ))
     return estilos
 
 

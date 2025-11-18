@@ -25,3 +25,4 @@ class Tra_PermOpe:
     FechaNac: datetime
     rtn: str
     Telefono: str
+    NumeroRenovacion: int

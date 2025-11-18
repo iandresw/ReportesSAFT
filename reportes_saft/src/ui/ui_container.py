@@ -7,7 +7,7 @@ from ui.ui_colors import color_border_contenedor, color_bg, container_color, col
 animation_style = Animation(500, AnimationCurve.EASE_IN_TO_LINEAR)
 
 
-def create_container(controls=[], col=1, width=100, height=1000, expand=True, content=None, alineacion_col=None) -> Container:
+def create_container(controls=[], col=1, width=None, height=None, expand=None, content=None, alineacion_col=None) -> Container:
     if content:
         content = content
     else:

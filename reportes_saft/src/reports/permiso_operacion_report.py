@@ -206,17 +206,6 @@ class PermisoOperacionReport:
 # TABLA QR
         num_permiso = Paragraph(
             f"{self.datos.NoPermiso}",  estilos["NumPermiso"], )
-        permiso_datos = f"{num_permiso}"
-        # Crea el QR (ajusta el tamaño con scale)
-        qr_widget = qr.QrCodeWidget(
-            permiso_datos, barLevel='H')  # barLevel H = máximo
-        bounds = qr_widget.getBounds()
-        width = bounds[2] - bounds[0]
-        height = bounds[3] - bounds[1]
-        tam = 60  # tamaño deseado en puntos (ajusta)
-        drawing = Drawing(tam, tam, transform=[
-                          tam/width, 0, 0, tam/height, 0, 0])
-        drawing.add(qr_widget)
 
         qr_img = qrcode.make(permiso_datos)
         buffer = BytesIO()
@@ -224,10 +213,10 @@ class PermisoOperacionReport:
         buffer.seek(0)
 
         # crea Flowable Image para ReportLab
-        qr_flowable = Image(buffer, width=40, height=40)
+        qr_flowable = Image(buffer, width=60, height=60)
 
 # TABLA FIRMA
-        if self.justicia_firma:
+        if not self.justicia_firma:
             valores_fila = [
                 Paragraph("",),
                 Paragraph("",),
@@ -278,7 +267,7 @@ class PermisoOperacionReport:
         valores_fila = [
             Paragraph(""),
             titulo,
-            drawing
+            qr_flowable
         ]
         tabla_titulo = Table(
             [valores_fila],

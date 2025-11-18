@@ -19,7 +19,7 @@ from reports.mora_bi_report import MoraBIReport
 
 
 class VistaReportes:
-    def __init__(self, page, context):
+    def __init__(self, page: ft.Page, context):
         self.page = page
         self.app = context
         self.app.init_saft()
@@ -29,19 +29,15 @@ class VistaReportes:
         self.datos_system = self.parametro_service.obtener_datos_systema()
         self.mora_bi = MoraBIService(self.app.conexion_saft, self.datos_system)
         self.mora_ip = MoraIPService(self.app.conexion_saft, self.datos_system)
-        self.update_app = UpdateService(self.page)
         self.mora_ics = MoraICSService(
             self.app.conexion_saft, self.datos_system)
+        self.mora_sp = MoraSPService(self.app.conexion_saft, self.datos_system)
+        self.update_app = UpdateService(self.page)
         self.trancicion = TrancicionTraspasoService(
             self.app.conexion_saft, self.datos_system)
-        self.mora_sp = MoraSPService(
-            self.app.conexion_saft, self.datos_system)
 
-        self.titulo_mensajes = container_titulo("Mensajes")
-        self.conten_titulo_mora_rpt = container_titulo(
-            "REPORTES DE MORA")
-        self.conten_titulo_otras_rpt = container_titulo(
-            "OTROS REPORTES")
+        self.conten_titulo_mora_rpt = container_titulo("REPORTES DE MORA")
+        self.conten_titulo_otras_rpt = container_titulo("OTROS REPORTES")
         self.conten_titulo_reportes = container_titulo("Reportes")
         self.conten_titulo_resultados = container_titulo("Caja Resultado")
 
@@ -62,42 +58,22 @@ class VistaReportes:
         self.btn_trancicon_traspaso = create_boton(
             text_label="Trancición y Traspaso", on_click=self.generar_reporte_trancicicon)
 
-        self.conten_mensajes = create_container(
-            expand=True,
-            controls=[ft.Column(controls=[],
-                                scroll=ft.ScrollMode.AUTO)],
-            col=12)
-
         self.conten_btn_mora_rpt = create_container(
-            controls=[ft.Row(
-                alignment=self.ft.MainAxisAlignment.CENTER,
-                controls=[self.ft.Column(
-                    alignment=self.ft.MainAxisAlignment.CENTER,
-                    controls=[
-                        self.btn_mora_bi,
-                        self.btn_mora_ip,
-                        self.btn_mora_ics,
-                        self.btn_mora_sp,
-                    ]
-                )
-                ]
-            )],
+            controls=[
+                self.btn_mora_bi,
+                self.btn_mora_ip,
+                self.btn_mora_ics,
+                self.btn_mora_sp,
+            ],
             expand=True,
             height=538,
             col=12
         )
 
         self.content_btn_otras_rpt = create_container(
-            controls=[ft.Row(
-                alignment=self.ft.MainAxisAlignment.START,
-                controls=[self.ft.Column(
-                    alignment=self.ft.MainAxisAlignment.START,
-                    controls=[
-                        self.btn_trancicon_traspaso
-                    ]
-                )
-                ]
-            )],
+            controls=[
+                self.btn_trancicon_traspaso
+            ],
             expand=True,
             height=538,
             col=12
@@ -110,7 +86,7 @@ class VistaReportes:
                     self.conten_titulo_mora_rpt,
                     self.conten_btn_mora_rpt,
                 ],
-                alignment=ft.MainAxisAlignment.CENTER, col=4
+                alignment=ft.MainAxisAlignment.CENTER,
             )
         )
         self.frame_otros_rpt = ft.Container(
@@ -121,7 +97,7 @@ class VistaReportes:
                     self.conten_titulo_otras_rpt,
                     self.content_btn_otras_rpt,
                 ],
-                alignment=ft.MainAxisAlignment.CENTER, col=4
+                alignment=ft.MainAxisAlignment.CENTER,
             )
         )
         self.frame_1_2 = ft.Container(
@@ -138,9 +114,7 @@ class VistaReportes:
         )
 
     def build(self):
-        return ft.Column([
-            self.frame_1_2
-        ])
+        return self.frame_1_2
 
     def generar_reporte_mora_bi(self, e):
         try:
@@ -266,15 +240,26 @@ class VistaReportes:
 
     def generar_reporte_trancicicon(self, e):
         try:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Iniciando Reporte", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
+            fila_nack_bar = ft.Row([ft.ProgressRing(height=20, width=20), ft.Text(
+                f"INICIANDO", size=14)])
+            self.page.open(self.ft.SnackBar(fila_nack_bar,
+                                            bgcolor=ft.Colors.GREEN_700, duration=20
+                                            ))
             datos, datos_cat, datos_sp = self.trancicion.obtener_contribuyentes()
             self.page.open(self.ft.SnackBar(
                 ft.Text(f"Data Optenida", size=14),
                 bgcolor=ft.Colors.GREEN_700,
             ))
+
+            dlg = ft.AlertDialog(
+                title=ft.Text("Hello"),
+                content=ft.Text("You are notified!"),
+                alignment=ft.alignment.center,
+                on_dismiss=lambda e: print("Dialog dismissed!"),
+                title_padding=ft.padding.all(25),
+            )
+
+            self.page.open(dlg)
             reporte = TrancicionReport(
                 datos, datos_cat, datos_sp, self.datos_muni, "TRANCICION Y TRASPASO")
             nombre_archivo = "trancicion_report.pdf"
@@ -283,10 +268,14 @@ class VistaReportes:
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
             # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
+            dlg.open = False
+            self.page.update()
+
+            fila_nack_bar = ft.Row([ft.ProgressRing(height=20, width=20), ft.Text(
+                f"Reporte generado: {nombre_archivo}", size=14)])
+            self.page.open(self.ft.SnackBar(fila_nack_bar,
+                                            bgcolor=ft.Colors.GREEN_700, duration=20
+                                            ))
 
             self.page.update()
 

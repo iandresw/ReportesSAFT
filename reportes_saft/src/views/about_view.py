@@ -31,7 +31,7 @@ class VistaAbout:
 
         self.conten_acerca_de = create_container(
             expand=True,
-            height=580,
+            # height=580,
             col=12,
             alineacion_col=self.ft.MainAxisAlignment.CENTER,
             controls=[

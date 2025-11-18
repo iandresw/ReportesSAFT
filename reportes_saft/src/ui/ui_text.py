@@ -52,6 +52,7 @@ def txt_label_text(text=''):
 def create_texFiel_fijas(label_text="", visible=True, read_only=True, width=None):
     return TextField(
         label=label_text,
+        expand=True,
         border_radius=10,
         width=width,
         height=alto_textFiel,
