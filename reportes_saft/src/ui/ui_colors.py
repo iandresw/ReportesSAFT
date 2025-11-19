@@ -43,3 +43,11 @@ def color_fill_chek():
 
 def color_check():
     return '#415a77'
+
+
+def color_bg_snack():
+    return '#415a77'
+
+
+def color_bg_snack_error():
+    return '#E06C75'

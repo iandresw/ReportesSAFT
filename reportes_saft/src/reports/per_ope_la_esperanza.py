@@ -81,11 +81,12 @@ if os.path.exists(font_britannic_bold):
 
 
 class PerOpeLaEsperanzaReport:
-    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False):
+    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False):
         self.datos = datos
         self.municipio = municipio
         self.titulo = titulo_reporte
         self.justicia_firma = firma_justicia
+        self.muni_admin = municipio_admin
 
     def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
         doc = SimpleDocTemplate(ruta_salida, pagesize=(612, 460),
@@ -112,7 +113,7 @@ class PerOpeLaEsperanzaReport:
         titulo_po = Paragraph(
             f"PERMISO DE OPERACIÓN DE NEGOCIOS {self.datos.Periodo}", estilos["la_esperanza_title_ope"],)
         telefonos = Paragraph(
-            f"TELEFONO: 2783-1818, 2783-1296 ", estilos["la_esperanza_telefono"],)
+            f"TELEFONO: {self.municipio["Telefono"]}, {self.municipio["Fax"]}", estilos["la_esperanza_telefono"],)
 
 # TABLA PROPIETARIO
         fila_negocio = [
@@ -206,10 +207,10 @@ class PerOpeLaEsperanzaReport:
         if not self.justicia_firma:
             valores_fila = [
                 Paragraph("",),
-                Paragraph("Dr. Miguel Antonio Fajardo Mejia",
+                Paragraph(f"{self.muni_admin["Alcalde"]}",
                           estilos["la_esperanza_campos_firma"]),
                 Paragraph("",),
-                Paragraph("P.M. Luz Marina Hernández",
+                Paragraph(f"{self.muni_admin["Tesorero"]}",
                           estilos["la_esperanza_campos_firma"]),
                 Paragraph("",),
             ]
@@ -238,11 +239,27 @@ class PerOpeLaEsperanzaReport:
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ]))
         else:
+            if self.justicia_firma == "1":
+                label = "JUSTICIA MUNICIPAL"
+                valor_firma = "Nombre Justicia"
+            else:
+                label = "UNIDAD AMBIENTAL"
+                valor_firma = "Nombre Ambiental"
             valores_fila = [
+                Paragraph(f"{self.muni_admin["Alcalde"]}",
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(valor_firma,
+                          estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(f"{self.muni_admin["Tesorero"]}",
+                          estilos["la_esperanza_campos_firma"]),
+            ]
+            valores_fila_1 = [
                 Paragraph("ALCALDE MUNICIPAL",
                           estilos["la_esperanza_campos_firma"]),
                 Paragraph(""),
-                Paragraph("DIRECCIÓN DE JUSTICIA MUNICIPAL",
+                Paragraph(label,
                           estilos["la_esperanza_campos_firma"]),
                 Paragraph(""),
                 Paragraph("TESORERA MUNICIPAL",
@@ -250,14 +267,12 @@ class PerOpeLaEsperanzaReport:
             ]
 
             tabla_firma = Table(
-                [valores_fila],
-                colWidths=[20, 210, 20, 210, 20],  # ajusta según tus márgenes
+                [valores_fila, valores_fila_1],
+                colWidths=[150, 20, 150, 20, 150],  # ajusta según tus márgenes
             )
             tabla_firma.setStyle(TableStyle([
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                # línea encima de Administración Tributaria
-                ("LINEABOVE", (1, 0), (1, 0), 1, "black"),
                 # línea encima de Justicia Municipal
                 ("LINEABOVE", (0, 0), (0, 0), 1, "black"),
                 ("LINEABOVE", (2, 0), (2, 0), 1, "black"),

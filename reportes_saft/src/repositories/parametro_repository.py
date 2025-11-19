@@ -40,3 +40,21 @@ class ParametroRepository:
 
             columns = [column[0] for column in cur.description]
             return dict(zip(columns, row))
+
+    def obtener_parametros_cont(self):
+        query = """
+        SELECT 
+            FechaCierreAnual, MesActivoInicio, MesActivoFin, TipoNumPartidas, SeqPartidaActual, NombreEmpresa, RtnEmpresa, CtaResultadoPeriodo, CtaResultadoNeto, InicioSistema, NumPartidaActual, MesActivoInicioPres, 
+            MesActivoFinPres, CtaContableCaja, DiaProcesoTes, AfectaPresIng, AfectaPresEg, ReciboTes, UltNumCheque, UltNumOC, UltNumOP, MonedaNominal, NombreDepartamento, ModeloBalance, YearPresup, ModuloEnUso, 
+            ContaUpdateFromPresu, UltNumFact, UltNumRec, UltNumAbonado, Alcalde, Tesorero, Contabilidad, Administrador, Presupuesto, Auditor, Tributaria, Catastro, CtaCaja, CtaBanco, CopRec, UltNoCai, CodigoCai, FacRes, 
+            UltCat
+        FROM ParametroCont
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            row = cur.fetchone()
+            if not row:
+                return None
+
+            columns = [column[0] for column in cur.description]
+            return dict(zip(columns, row))

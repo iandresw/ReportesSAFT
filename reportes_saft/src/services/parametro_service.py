@@ -22,3 +22,10 @@ class ParametroService:
             raise ValueError(
                 "No se encontraron parámetros del systema.")
         return datos
+
+    def obtener_datos_municipalidad_admin(self):
+        datos = self.repo.obtener_parametros_cont()
+        if not datos:
+            raise ValueError(
+                "No se encontraron parámetros del systema.")
+        return datos

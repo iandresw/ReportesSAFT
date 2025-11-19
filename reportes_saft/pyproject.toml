@@ -13,7 +13,9 @@ dependencies = [
   "reportlab",
   "python-dotenv",
   "requests",
-  "qrcode"
+  "qrcode",
+  "pandas",
+  "openpyxl",
 ]
 
 [tool.flet]

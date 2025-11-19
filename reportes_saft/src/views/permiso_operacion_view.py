@@ -29,6 +29,7 @@ class VistaPermisoOperacion:
 
         self.parametro_service = ParametroService(self.app.conexion_saft)
         self.datos_muni = self.parametro_service.obtener_datos_municipalidad()
+        self.datos_muni_admin = self.parametro_service.obtener_datos_municipalidad_admin()
         self.datos_system = self.parametro_service.obtener_datos_systema()
         self.repo_permiso = PermisooperacionServices(
             self.app.conexion_saft, self.datos_system)
@@ -39,6 +40,17 @@ class VistaPermisoOperacion:
             [create_radio(value="Apertura", label_text="Apertura"),
              create_radio(value="Renovacion", label_text="Renovación")],),
         )
+        self.rd_firma = ft.RadioGroup(disabled=True, value='0', content=ft.Row(
+
+            [
+                create_radio(value="0", label_text="Ninguno"),
+                create_radio(value="1", label_text="Firma Justicia Municipal"),
+                create_radio(value="2", label_text="Firma Unidad Ambiental")],),
+        )
+        if self.datos_muni["CodMuni"] == "0512":
+            self.firma = self.rd_firma
+        else:
+            self.firma = self.chk_firma_justicia
         # ALERTAS
         self.alert_recibo = AlertaGeneral(
             titulo=ft.Text("Permiso de Operación"),
@@ -158,7 +170,7 @@ class VistaPermisoOperacion:
                         ft.Row(
                             alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
                             controls=[
-                                self.chk_firma_justicia,
+                                self.firma,
                                 ft.Divider(),
                                 self.rd_tipo_solcitud,
                             ],
@@ -196,7 +208,7 @@ class VistaPermisoOperacion:
     def consultar_recibo(self, e):
         num_recibo = self.txt_no_recibo.value
         existe = self.repo_permiso.existe_po(num_recibo)
-        justicia = self.chk_firma_justicia.value
+        justicia = self.firma.value
         tipo_per = self.rd_tipo_solcitud.value
         self.permiso = self.repo_permiso.crear_permiso_operacion(
             int(num_recibo), justicia, tipo_per)  # type: ignore
@@ -229,8 +241,8 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = True
             self.btn_imprimir.update()
-            self.chk_firma_justicia.disabled = False
-            self.chk_firma_justicia.update()
+            self.firma.disabled = False
+            self.firma.update()
             self.rd_tipo_solcitud.update()
 
         else:
@@ -240,13 +252,17 @@ class VistaPermisoOperacion:
             self.btn_imprimir.disabled = False
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
+            if self.datos_muni["CodMuni"] == "0512":
+                self.firma.value = str(self.permiso.FirmaJ)
 
-            self.chk_firma_justicia.value = bool(self.permiso.FirmaJ)
-            self.chk_firma_justicia.disabled = True
-            self.chk_firma_justicia.update()
+            else:
+                self.firma.value = bool(self.permiso.FirmaJ)
+            self.firma.disabled = True
+            self.firma.update()
         self.page.update()
 
     def guardar_recibo_po(self, e):
+        self.permiso.FirmaJ = self.firma.value
         if self.repo_permiso.guardar_perm_operacion(self.permiso):
             self.btn_guardar.disabled = True
             self.btn_guardar.style.bgcolor = self.bg_2_color
@@ -258,10 +274,10 @@ class VistaPermisoOperacion:
 
     def imprimir_rept_po(self, e):
         try:
-            justicia = self.chk_firma_justicia.value
+            justicia = self.firma.value
             if self.datos_muni["CodMuni"] == "0512":
                 reporte = PerOpeLaEsperanzaReport(
-                    self.permiso, self.datos_muni, "", justicia)
+                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)
             else:
                 reporte = PermisoOperacionReport(
                     self.permiso, self.datos_muni, "", justicia)
@@ -276,13 +292,37 @@ class VistaPermisoOperacion:
             self.page.open(self.ft.SnackBar(fila_nack_bar,
                                             bgcolor=ft.Colors.GREEN_700, duration=20
                                             ))
-            self.btn_guardar.disabled = False
-            self.btn_guardar.style.bgcolor = self.bg_color
+            self.btn_guardar.disabled = True
+            self.btn_guardar.style.bgcolor = self.bg_2_color
             self.btn_guardar.update()
 
-            self.btn_imprimir.disabled = False
-            self.btn_imprimir.style.bgcolor = self.bg_color
+            self.btn_imprimir.disabled = True
+            self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.update()
+            self.txt_no_permiso.value = str(self.permiso.NoPermiso)
+
+            self.txt_no_recibo.value = ""
+            self.txt_periodo.value = ""
+            self.txt_ini_operaion.value = ""
+            self.txt_telefono.value = ""
+            self.txt_rtm.value = ""
+            self.txt_rtn.value = ""
+            self.txt_fecha_emission.value = ""
+            self.txt_nombre_establecimiento.value = ""
+            self.txt_identidad.value = ""
+            self.txt_nombrePropietario.value = ""
+            self.txt_claveCatastral.value = ""
+            self.txt_ubicacion.value = ""
+            self.txt_act_economica.value = ""
+            self.txt_tipo_establecimiento.value = ""
+            self.rd_tipo_solcitud.value = ""
+            self.txt_num_renovacion.value = ""
+            self.txt_no_permiso.value = ""
+            if self.datos_muni["CodMuni"] == "0512":
+                self.firma.value = "0"
+            else:
+                self.firma.value = False
+
             self.page.update()
 
         except Exception as ex:
@@ -290,11 +330,11 @@ class VistaPermisoOperacion:
                 ft.Text(f"Error: {str(ex)}", size=14),
                 bgcolor=ft.Colors.RED_700,
             ))
-            self.btn_guardar.disabled = False
+            self.btn_guardar.disabled = True
             self.btn_guardar.style.bgcolor = self.bg_color
             self.btn_guardar.update()
 
-            self.btn_imprimir.disabled = False
+            self.btn_imprimir.disabled = True
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             self.page.update()

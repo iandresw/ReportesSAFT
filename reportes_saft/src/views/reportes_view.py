@@ -3,7 +3,8 @@ import os
 import webbrowser
 from ui.ui_alertas import AlertaGeneral
 from ui.ui_botones import create_boton
-from ui.ui_container import container_titulo, create_container
+from ui.ui_container import color_bg, color_bg_2, container_titulo, create_container
+from ui.ui_snack_bar import snack_inicio, snack_rpt_generado, snack_error
 
 from services.parametro_service import ParametroService
 from services.mora_bi_services import MoraBIService
@@ -12,6 +13,7 @@ from services.mora_ics_sevices import MoraICSService
 from services.mora_sp_services import MoraSPService
 from services.update_services import UpdateService
 from services.trancicion_traspaso_servivces import TrancicionTraspasoService
+from services.trancicion_traspaso_det_services import TrancicionTraspasoDetalleService
 from reports.trancicion_report import TrancicionReport
 from reports.mora_sp_report import MoraSPReport
 from reports.mora_ics_report import MoraICSReport
@@ -34,6 +36,8 @@ class VistaReportes:
         self.mora_sp = MoraSPService(self.app.conexion_saft, self.datos_system)
         self.update_app = UpdateService(self.page)
         self.trancicion = TrancicionTraspasoService(
+            self.app.conexion_saft, self.datos_system)
+        self.trancicion_detalle = TrancicionTraspasoDetalleService(
             self.app.conexion_saft, self.datos_system)
 
         self.conten_titulo_mora_rpt = container_titulo("REPORTES DE MORA")
@@ -58,6 +62,22 @@ class VistaReportes:
         self.btn_trancicon_traspaso = create_boton(
             text_label="Trancición y Traspaso", on_click=self.generar_reporte_trancicicon)
 
+        self.btn_trancicon_ip_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle IP", on_click=self.generar_reporte_trancicicon_det_ip)
+        self.btn_trancicon_bi_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle BI", on_click=self.generar_reporte_trancicicon_det_bi)
+
+        self.btn_trancicon_ics_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle ICS", on_click=self.generar_reporte_trancicicon_det_ics)
+
+        self.btn_trancicon_amb_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle AMB", on_click=self.generar_reporte_trancicicon_det_amb)
+
+        self.btn_trancicon_ist_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle IST", on_click=self.generar_reporte_trancicicon_det_ist)
+        self.btn_trancicon_sp_detalle = create_boton(
+            text_label="Trancición y Traspaso Detalle SP", on_click=self.generar_reporte_trancicicon_det_sp)
+
         self.conten_btn_mora_rpt = create_container(
             controls=[
                 self.btn_mora_bi,
@@ -72,7 +92,13 @@ class VistaReportes:
 
         self.content_btn_otras_rpt = create_container(
             controls=[
-                self.btn_trancicon_traspaso
+                self.btn_trancicon_traspaso,
+                self.btn_trancicon_ip_detalle,
+                self.btn_trancicon_bi_detalle,
+                self.btn_trancicon_ics_detalle,
+                self.btn_trancicon_amb_detalle,
+                self.btn_trancicon_ist_detalle,
+                self.btn_trancicon_sp_detalle
             ],
             expand=True,
             height=538,
@@ -116,173 +142,164 @@ class VistaReportes:
     def build(self):
         return self.frame_1_2
 
-    def generar_reporte_mora_bi(self, e):
+    def cargar_snack_final(self, nombre_archivo, e):
+        e.control.disabled = False
+        e.control.style.bgcolor = color_bg_2()
+        e.control.update()
+        snack = snack_rpt_generado(nombre_archivo)
+        self.page.open(snack)
+        self.page.update()
+
+    def cargar_snack_errr(self, error):
+        snack = snack_error(str(error))
+        self.page.open(snack)
+        self.page.update()
+
+    def cargar_snack_inicio(self, mensaje, e):
+        e.control.disabled = True
+        e.control.style.bgcolor = color_bg()
+        e.control.update()
+        snack = snack_inicio(str(mensaje))
+        self.page.open(snack)
+        self.page.update()
+
+    async def generar_reporte_mora_bi(self, e):
+        nombre_archivo = "mora_ip_report.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
             if self.datos_system['TpoCuenta']:
                 datos = self.mora_bi.obtener_mora_bi_sami()
             else:
                 datos = self.mora_bi.obtener_mora_bi_gob()
             reporte = MoraBIReport(datos, self.datos_muni, "BIENES INMUEBLES")
-            nombre_archivo = "mora_bi_report.pdf"
-            ruta = os.path.join(os.getcwd(), nombre_archivo)
-
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
-            # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-
-            self.page.update()
-
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
         except Exception as ex:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}", size=14),
-                bgcolor=ft.Colors.RED_700,
-            ))
+            self.cargar_snack_errr(ex)
 
-            self.page.update()
-
-    def generar_reporte_mora_ip(self, e):
+    async def generar_reporte_mora_ip(self, e):
+        nombre_archivo = "mora_ip_report.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
             datos = self.mora_ip.obtener_mora_ip()
             reporte = MoraBIReport(datos, self.datos_muni, "IMPUESTO PERSONAL")
-            nombre_archivo = "mora_ip_report.pdf"
-            ruta = os.path.join(os.getcwd(), nombre_archivo)
-
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
-            # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-            self.page.update()
-
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
         except Exception as ex:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}", size=14),
-                bgcolor=ft.Colors.RED_700,
-            ))
+            self.cargar_snack_errr(ex)
 
-            self.page.update()
-
-    def generar_reporte_mora_ics(self, e):
+    async def generar_reporte_mora_ics(self, e):
+        nombre_archivo = "mora_ics_report.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
             if self.datos_system['TpoCuenta']:
                 datos_i, datos_c, datos_s, datos_t = self.mora_ics.obtener_mora_ics_sami()
             else:
                 datos_i, datos_c, datos_s, datos_t = self.mora_ics.obtener_mora_ics_gob()
             reporte = MoraICSReport(
                 datos_i, datos_c, datos_s, datos_t, self.datos_muni, "INDUSTRIA, COMERCIO Y SERVICIO")
-            nombre_archivo = "mora_ics_report.pdf"
-            ruta = os.path.join(os.getcwd(), nombre_archivo)
-
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
-            # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-
-            self.page.update()
-
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
         except Exception as ex:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}", size=14),
-                bgcolor=ft.Colors.RED_700,
-            ))
+            self.cargar_snack_errr(ex)
 
-            self.page.update()
-
-    def generar_reporte_mora_sp(self, e):
+    async def generar_reporte_mora_sp(self, e):
+        nombre_archivo = "mora_sp_report.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Iniciando Reporte", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-
-            self.page.update()
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
             (datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques,
              datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucion) = self.mora_sp.obtener_mora_sp_sami()
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Data Optenida", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
             reporte = MoraSPReport(datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques,
                                    datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucion, self.datos_muni, "SERVICIOS Y TASAS MUNICIPALIES")
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Renerando Reporte ", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-            nombre_archivo = "mora_sp_report.pdf"
-            ruta = os.path.join(os.getcwd(), nombre_archivo)
-
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
-            # Mostrar notificación
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Reporte generado: {nombre_archivo}", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-
-            self.page.update()
-
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
         except Exception as ex:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}", size=14),
-                bgcolor=ft.Colors.RED_700,
-            ))
+            self.cargar_snack_errr(ex)
 
-            self.page.update()
-
-    def generar_reporte_trancicicon(self, e):
+    async def generar_reporte_trancicicon(self, e):
+        nombre_archivo = "trancicion_report.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
-            fila_nack_bar = ft.Row([ft.ProgressRing(height=20, width=20), ft.Text(
-                f"INICIANDO", size=14)])
-            self.page.open(self.ft.SnackBar(fila_nack_bar,
-                                            bgcolor=ft.Colors.GREEN_700, duration=20
-                                            ))
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
             datos, datos_cat, datos_sp = self.trancicion.obtener_contribuyentes()
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Data Optenida", size=14),
-                bgcolor=ft.Colors.GREEN_700,
-            ))
-
-            dlg = ft.AlertDialog(
-                title=ft.Text("Hello"),
-                content=ft.Text("You are notified!"),
-                alignment=ft.alignment.center,
-                on_dismiss=lambda e: print("Dialog dismissed!"),
-                title_padding=ft.padding.all(25),
-            )
-
-            self.page.open(dlg)
             reporte = TrancicionReport(
                 datos, datos_cat, datos_sp, self.datos_muni, "TRANCICION Y TRASPASO")
-            nombre_archivo = "trancicion_report.pdf"
-            ruta = os.path.join(os.getcwd(), nombre_archivo)
-
             reporte.generar_pdf(ruta)
             webbrowser.open_new_tab(f"file://{ruta}")
-            # Mostrar notificación
-            dlg.open = False
-            self.page.update()
-
-            fila_nack_bar = ft.Row([ft.ProgressRing(height=20, width=20), ft.Text(
-                f"Reporte generado: {nombre_archivo}", size=14)])
-            self.page.open(self.ft.SnackBar(fila_nack_bar,
-                                            bgcolor=ft.Colors.GREEN_700, duration=20
-                                            ))
-
-            self.page.update()
-
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
         except Exception as ex:
-            self.page.open(self.ft.SnackBar(
-                ft.Text(f"Error: {str(ex)}", size=14),
-                bgcolor=ft.Colors.RED_700,
-            ))
+            self.cargar_snack_errr(ex)
 
-            self.page.update()
+    async def generar_reporte_trancicicon_det_ip(self, e):
+        nombre_archivo = "trancicion_report_detalle_ip.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_ip(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_trancicicon_det_bi(self, e):
+        nombre_archivo = "trancicion_report_detalle_bi.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_bi(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_trancicicon_det_ics(self, e):
+        nombre_archivo = "trancicion_report_detalle_ics.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_ics(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_trancicicon_det_amb(self, e):
+        nombre_archivo = "trancicion_report_detalle_amb.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_amb(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_trancicicon_det_ist(self, e):
+        nombre_archivo = "trancicion_report_detalle_ist.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_ist(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_trancicicon_det_sp(self, e):
+        nombre_archivo = "trancicion_report_detalle_sp.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            self.trancicion_detalle.obtener_contribuyentes_sp(ruta)
+            os.startfile(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)

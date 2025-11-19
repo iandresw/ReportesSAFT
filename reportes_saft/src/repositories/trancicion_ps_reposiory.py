@@ -69,3 +69,77 @@ class TrancicionSPRepository:
                 return None
             columns = [column[0] for column in cur.description]
             return [dict(zip(columns, row)) for row in rows]
+
+
+# DETALLE SERVICIOS PUBLICOS
+
+
+    def obtener_sp_gob_inicio_detalle(self, cta_sp: str, anio: int):
+        query = """
+            SELECT AvPgEnc.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido, Contribuyente.Direccion
+            FROM  AvPgDetalle INNER JOIN
+            AvPgEnc ON AvPgDetalle.NumAvPg = AvPgEnc.NumAvPg INNER JOIN
+            Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
+            WHERE (DATEPART(year, AvPgEnc.FechaVenceAvPg) < ?) AND (SUBSTRING(AvPgDetalle.CtaIngreso, 1, 8) IN (?))
+            GROUP BY  AvPgEnc.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido, Contribuyente.Direccion
+            ORDER BY AvPgEnc.Identidad
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (cta_sp, anio,))
+            rows = cur.fetchall()
+            if not rows:
+                return []
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in rows]
+
+    def obtener_sp_sami_inicio_detalle(self, anio: int, cta_sp: str):
+        query = """
+            SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.Direccion
+            FROM  AvPgDetalle INNER JOIN
+            AvPgEnc ON AvPgDetalle.NumAvPg = AvPgEnc.NumAvPg INNER JOIN
+            Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
+            WHERE  (DATEPART(year, AvPgEnc.FechaVenceAvPg) > ?) AND (SUBSTRING(AvPgDetalle.CtaIngreso, 1, 9) IN (?))
+            GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.Direccion
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (anio, cta_sp))
+            rows = cur.fetchall()
+            if not rows:
+                return None
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in rows]
+
+    def obtener_sp_gob_final_detalle(self, cta_sp: str):
+        query = """
+            SELECT AvPgEnc.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido, Contribuyente.Direccion
+            FROM  AvPgDetalle INNER JOIN
+            AvPgEnc ON AvPgDetalle.NumAvPg = AvPgEnc.NumAvPg INNER JOIN
+            Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
+            WHERE  (SUBSTRING(AvPgDetalle.CtaIngreso, 1, 8) IN (?))
+            GROUP BY  AvPgEnc.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido, Contribuyente.Direccion
+            ORDER BY AvPgEnc.Identidad
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (cta_sp))
+            rows = cur.fetchall()
+            if not rows:
+                return []
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in rows]
+
+    def obtener_sp_sami_final_detalle(self,  cta_sp: str):
+        query = """
+            SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.Direccion
+            FROM  AvPgDetalle INNER JOIN
+            AvPgEnc ON AvPgDetalle.NumAvPg = AvPgEnc.NumAvPg INNER JOIN
+            Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
+            WHERE   (SUBSTRING(AvPgDetalle.CtaIngreso, 1, 9) IN (?))
+            GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.Direccion
+        """
+        with self.conexion.cursor() as cur:
+            cur.execute(query, (cta_sp))
+            rows = cur.fetchall()
+            if not rows:
+                return None
+            columns = [column[0] for column in cur.description]
+            return [dict(zip(columns, row)) for row in rows]

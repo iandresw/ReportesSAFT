@@ -137,9 +137,9 @@ class TrancicionTraspasoService:
         cat_tec_rural = self.repo_trancicion_bi.obtener_tec_anio_inicio(
             1, self.anio-3)
         cat_tec_urbano_act = self.repo_trancicion_bi.obtener_tec_anio_fin(
-            0, self.anio-3)
+            0)
         cat_tec_rural_act = self.repo_trancicion_bi.obtener_tec_anio_fin(
-            1, self.anio-3)
+            1)
 
         data_catastro.append({
             'Tipo': 'Levantado (tecnificado)',
@@ -154,9 +154,9 @@ class TrancicionTraspasoService:
         cat_tec_rural = self.repo_trancicion_bi.obtener_dec_anio_inicio(
             1, self.anio-3)
         cat_tec_urbano_act = self.repo_trancicion_bi.obtener_dec_anio_fin(
-            0, self.anio-3)
+            0)
         cat_tec_rural_act = self.repo_trancicion_bi.obtener_dec_anio_fin(
-            1, self.anio-3)
+            1)
 
         data_catastro.append({
             'Tipo': 'Levantado  (Multifinalitario)',

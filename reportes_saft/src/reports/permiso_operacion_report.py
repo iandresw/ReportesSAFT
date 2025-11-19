@@ -48,7 +48,7 @@ else:
 
 
 class PermisoOperacionReport:
-    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False):
+    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False):
         self.datos = datos
         self.municipio = municipio
         self.titulo = titulo_reporte
