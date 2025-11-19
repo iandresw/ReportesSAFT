@@ -7,8 +7,13 @@ from repositories.trancicion_ps_reposiory import TrancicionSPRepository
 
 import pandas as pd
 from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.drawing.image import Image as XLImage
+from datetime import datetime
 from repositories.aldea_repository import AldeaRepository
 from services.parametro_service import ParametroService
+from reports.trancicion_det_ics_report import TrancicionICSDetalleReport
 
 
 class TrancicionTraspasoDetalleService:
@@ -21,6 +26,7 @@ class TrancicionTraspasoDetalleService:
         self.repo_aldea = AldeaRepository(conexion)
         self.parametro_systema = ParametroService(conexion)
         self.sys = sistem
+        self.rpt_excel_ics = TrancicionICSDetalleReport(self.sys)
         self.codAldea = self.repo_aldea.obtener_aldea_urbana()
         self.anio = datetime.now().year
         self.anio_inicio = 2022
@@ -53,15 +59,8 @@ class TrancicionTraspasoDetalleService:
             contribuyente_urbano_act.extend(contribuyente_urbano_act_ot)
         if contribuyente_rurales_act_ot:
             contribuyente_rurales_act.extend(contribuyente_rurales_act_ot)
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            pd.DataFrame(contribuyente_urbano).to_excel(
-                writer, sheet_name="IP Urbano", index=False)
-            pd.DataFrame(contribuyente_rural).to_excel(
-                writer, sheet_name="IP Rural", index=False)
-            pd.DataFrame(contribuyente_urbano_act).to_excel(
-                writer, sheet_name="Urbano Activos", index=False)
-            pd.DataFrame(contribuyente_rurales_act).to_excel(
-                writer, sheet_name="Rural Activos", index=False)
+        ruta_excel = self.rpt_excel_ics.generar_excel(
+            contribuyente_urbano, contribuyente_rural, contribuyente_urbano_act, contribuyente_rurales_act, ruta_excel, "IP")
 
         return ruta_excel
 
@@ -130,16 +129,8 @@ class TrancicionTraspasoDetalleService:
             codAldea=aldea, anio=self.anio)
         ics_rurales_act = self.repo_trancicion_ics.obtener_isc_rural_activos_detalle(
             codAldea=aldea, anio=self.anio)
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            pd.DataFrame(ics_urbano).to_excel(
-                writer, sheet_name="ICS Urbano", index=False)
-            pd.DataFrame(ics_rural).to_excel(
-                writer, sheet_name="ICS Rural", index=False)
-            pd.DataFrame(ics_urbano_act).to_excel(
-                writer, sheet_name="ICS Urbano Activos", index=False)
-            pd.DataFrame(ics_rurales_act).to_excel(
-                writer, sheet_name="ICS Rural Activos", index=False)
-
+        ruta_excel = self.rpt_excel_ics.generar_excel(
+            ics_urbano, ics_rural, ics_urbano_act, ics_rurales_act, ruta_excel, "ICS")
         return ruta_excel
 
     def obtener_contribuyentes_amb(self, ruta_excel: str):
@@ -156,15 +147,8 @@ class TrancicionTraspasoDetalleService:
             codAldea=aldea, anio=self.anio, ctaIngreso=cta_ambiental)
         amb_rurales_act = self.repo_trancicion_ot.obtener_amb_rural_activos_detalle(
             codAldea=aldea, anio=self.anio, ctaIngreso=cta_ambiental)
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            pd.DataFrame(amb_urbano).to_excel(
-                writer, sheet_name="AMB Urbano", index=False)
-            pd.DataFrame(amb_rural).to_excel(
-                writer, sheet_name="AMB Rural", index=False)
-            pd.DataFrame(amb_urbano_act).to_excel(
-                writer, sheet_name="AMB Urbano Activos", index=False)
-            pd.DataFrame(amb_rurales_act).to_excel(
-                writer, sheet_name="AMB Rural Activos", index=False)
+        ruta_excel = self.rpt_excel_ics.generar_excel(
+            amb_urbano, amb_rural, amb_urbano_act, amb_rurales_act, ruta_excel, "IER")
         return ruta_excel
 
     def obtener_contribuyentes_ist(self, ruta_excel: str):
@@ -181,15 +165,8 @@ class TrancicionTraspasoDetalleService:
             codAldea=aldea, anio=self.anio, ctaIngreso=cta_selectivo)
         amb_rurales_act = self.repo_trancicion_ot.obtener_amb_rural_activos_detalle(
             codAldea=aldea, anio=self.anio, ctaIngreso=cta_selectivo)
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            pd.DataFrame(amb_urbano).to_excel(
-                writer, sheet_name="IST Urbano", index=False)
-            pd.DataFrame(amb_rural).to_excel(
-                writer, sheet_name="IST Rural", index=False)
-            pd.DataFrame(amb_urbano_act).to_excel(
-                writer, sheet_name="IST Urbano Activos", index=False)
-            pd.DataFrame(amb_rurales_act).to_excel(
-                writer, sheet_name="IST Rural Activos", index=False)
+        ruta_excel = self.rpt_excel_ics.generar_excel(
+            amb_urbano, amb_rural, amb_urbano_act, amb_rurales_act, ruta_excel, "IER")
         return ruta_excel
 
     def obtener_contribuyentes_sp(self, ruta_excel: str):
@@ -206,15 +183,15 @@ class TrancicionTraspasoDetalleService:
                 "11111808": "Servicio de Transporte de Carne",
                 "11111809": "Servicio de Balanza Municipal",
                 "11111810": "Servicio de Limpieza de Solares Baldíos",
-                "11111811": "Servicio de Aseo, Mantenimiento de ¨Parques, Calles y Avenidas",
+                "11111811": "Servicio de Aseo, Mantenimiento de Parques, Calles y Avenidas",
                 "11111812": "Servicio de Limpieza de Cementerio",
                 "11111813": "Servicio Secretariales Municipales",
                 "11111814": "Servicio de muellaje",
                 "11111815": "Servicio de Turismo",
                 "11111816": "Servicio de Ciudadana",
-                "11111817": "Servicio No Clasificado cta: 118-17",
-                "11111818": "Servicio No Clasificado cta: 118-18",
-                "11111819": "Servicio No Clasificado cta: 118-19",
+                "11111817": "Servicio No Clasificado cta 118-17",
+                "11111818": "Servicio No Clasificado cta 118-18",
+                "11111819": "Servicio No Clasificado cta 118-19",
                 "11111820": "Tasa Ambiental",
                 "11111899": "Otros servicios municipales"
             }
@@ -262,10 +239,10 @@ class TrancicionTraspasoDetalleService:
             for nombre_servicio, datos in resultados.items():
                 hoja_inicio = f"{nombre_servicio} inicio"
                 hoja_final = f"{nombre_servicio} final"
-                if hoja_inicio:
+                if datos["inicio"]:
                     pd.DataFrame(datos["inicio"]).to_excel(
                         writer, sheet_name=hoja_inicio[:30], index=False)
-                if hoja_final:
+                if datos["final"]:
                     pd.DataFrame(datos["final"]).to_excel(
                         writer, sheet_name=hoja_final[:30], index=False)
 

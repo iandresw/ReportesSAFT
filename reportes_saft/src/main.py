@@ -22,6 +22,7 @@ def main(page: ft.Page):
     # --- Configuración ventana ---
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.window.icon = "assets/icon.ico"
     # page.window.maximizable = True
     # page.window.resizable = False
     # x_height = 680
@@ -135,4 +136,4 @@ def main(page: ft.Page):
     )
 
 
-ft.app(main)
+ft.app(target=main)

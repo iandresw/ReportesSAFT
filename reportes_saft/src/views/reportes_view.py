@@ -1,6 +1,7 @@
 import flet as ft
 import os
 import webbrowser
+import asyncio
 from ui.ui_alertas import AlertaGeneral
 from ui.ui_botones import create_boton
 from ui.ui_container import color_bg, color_bg_2, container_titulo, create_container
@@ -146,21 +147,21 @@ class VistaReportes:
         e.control.disabled = False
         e.control.style.bgcolor = color_bg_2()
         e.control.update()
-        snack = snack_rpt_generado(nombre_archivo)
-        self.page.open(snack)
+        snack_fin = snack_rpt_generado(nombre_archivo)
+        self.page.open(snack_fin)
         self.page.update()
 
     def cargar_snack_errr(self, error):
-        snack = snack_error(str(error))
-        self.page.open(snack)
+        snack_err = snack_error(str(error))
+        self.page.open(snack_err)
         self.page.update()
 
     def cargar_snack_inicio(self, mensaje, e):
         e.control.disabled = True
         e.control.style.bgcolor = color_bg()
         e.control.update()
-        snack = snack_inicio(str(mensaje))
-        self.page.open(snack)
+        snack_ini = snack_inicio(str(mensaje))
+        self.page.open(snack_ini)
         self.page.update()
 
     async def generar_reporte_mora_bi(self, e):
@@ -168,14 +169,16 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             if self.datos_system['TpoCuenta']:
                 datos = self.mora_bi.obtener_mora_bi_sami()
             else:
                 datos = self.mora_bi.obtener_mora_bi_gob()
             reporte = MoraBIReport(datos, self.datos_muni, "BIENES INMUEBLES")
             reporte.generar_pdf(ruta)
-            webbrowser.open_new_tab(f"file://{ruta}")
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -184,11 +187,13 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             datos = self.mora_ip.obtener_mora_ip()
             reporte = MoraBIReport(datos, self.datos_muni, "IMPUESTO PERSONAL")
             reporte.generar_pdf(ruta)
-            webbrowser.open_new_tab(f"file://{ruta}")
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -197,6 +202,7 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             if self.datos_system['TpoCuenta']:
                 datos_i, datos_c, datos_s, datos_t = self.mora_ics.obtener_mora_ics_sami()
             else:
@@ -204,8 +210,9 @@ class VistaReportes:
             reporte = MoraICSReport(
                 datos_i, datos_c, datos_s, datos_t, self.datos_muni, "INDUSTRIA, COMERCIO Y SERVICIO")
             reporte.generar_pdf(ruta)
-            webbrowser.open_new_tab(f"file://{ruta}")
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -214,13 +221,15 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             (datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques,
              datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucion) = self.mora_sp.obtener_mora_sp_sami()
             reporte = MoraSPReport(datos_agua, datos_alcantarillado, datos_tren, datos_bombero, datos_solares, datos_parques,
                                    datos_lim_cementerio, datos_ase_cementerio, datos_ambiente, datos_contribucion, self.datos_muni, "SERVICIOS Y TASAS MUNICIPALIES")
             reporte.generar_pdf(ruta)
-            webbrowser.open_new_tab(f"file://{ruta}")
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -229,12 +238,14 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             datos, datos_cat, datos_sp = self.trancicion.obtener_contribuyentes()
             reporte = TrancicionReport(
                 datos, datos_cat, datos_sp, self.datos_muni, "TRANCICION Y TRASPASO")
             reporte.generar_pdf(ruta)
-            webbrowser.open_new_tab(f"file://{ruta}")
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -243,9 +254,11 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_ip(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -254,9 +267,11 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_bi(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -265,9 +280,11 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_ics(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -276,9 +293,11 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_amb(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -287,9 +306,11 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_ist(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
 
@@ -298,8 +319,10 @@ class VistaReportes:
         ruta = os.path.join(os.getcwd(), nombre_archivo)
         try:
             self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            await asyncio.sleep(0.5)
             self.trancicion_detalle.obtener_contribuyentes_sp(ruta)
-            os.startfile(ruta)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            os.startfile(ruta)
         except Exception as ex:
             self.cargar_snack_errr(ex)
