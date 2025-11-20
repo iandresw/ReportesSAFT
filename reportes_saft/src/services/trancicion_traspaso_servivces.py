@@ -3,7 +3,7 @@ from repositories.trancicion_ip_repository import TrancicionIPRepository
 from repositories.trancicion_bi_repository import TrancicionBIRepository
 from repositories.trancicion_ics_repository import TrancicionICSRepository
 from repositories.trancicion_amb_reposiory import TrancicionAMBRepository
-
+import pandas as pd
 from repositories.trancicion_ps_reposiory import TrancicionSPRepository
 from repositories.aldea_repository import AldeaRepository
 from services.parametro_service import ParametroService
@@ -230,17 +230,21 @@ class TrancicionTraspasoService:
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1521902')
 
-        for data_s in sp_inicio:
+        df_inicio = pd.DataFrame(sp_inicio)
+        df_final = pd.DataFrame(sp_final)
+        df = df_inicio.merge(df_final, on="Cuenta", how="right")
+        df = df.fillna(0)
+        for _, data_s in df.iterrows():
             cuenta = data_s['Cuenta']
             tipo = cta_sp.get(cuenta, "Servicio desconocido")
-            val_final = next(
-                (item for item in sp_final if item['Cuenta'] == cuenta), None)
+            val_inicio = int(data_s.get('Total_x', data_s.get('Total_x', 0)))
+            val_final = data_s.get('Total_y', 0)
 
             data_sp.append({
                 'Cuenta': cuenta,
                 'Tipo': tipo,
-                'Valor_inicio': data_s['Total'],
-                'Valor_final': val_final['Total'] if val_final else 0
+                'Valor_inicio': val_inicio,
+                'Valor_final': val_final
             })
 
         if not data:

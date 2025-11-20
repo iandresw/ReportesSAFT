@@ -5,6 +5,7 @@ import ctypes
 import flet as ft
 from views.updater_view import VistaUpdater
 from utils.utils import is_admin
+from ui.ui_colors import color_bg
 from dotenv import load_dotenv
 # === CONFIGURACIÓN ===
 APP_DIR = r"C:\Program Files (x86)\SAFT\reportes_py"
@@ -12,10 +13,13 @@ load_dotenv()
 
 
 def main(page: ft.Page):
-    page.title = "Actualizador ReportesSAFT"
+
+    bg_color = color_bg()
+
+    page.title = "Actualizador SAFT"
     x_width = 350
     x_height = 700
-    page.bgcolor = '#1b263b'
+    page.bgcolor = bg_color
     page.window.width = x_width
     page.window.height = x_height
     page.window.max_height = x_height
@@ -28,23 +32,21 @@ def main(page: ft.Page):
 
 # === PUNTO DE ENTRADA ===
 if __name__ == "__main__":
-    print(os.getenv("DEBUG_SKIP_ELEVATE"))
-    if not os.getenv("DEBUG_SKIP_ELEVATE") == "1":
-        if not is_admin():
-            if "--elevated" not in sys.argv:
-                if getattr(sys, 'frozen', False):
-                    script_path = sys.executable
-                else:
-                    script_path = os.path.abspath(sys.argv[0])
-                args = [script_path] + sys.argv[1:] + ["--elevated"]
-                try:
-                    params = shlex.join(args)
-                except AttributeError:
-                    params = " ".join(f'"{a}"' for a in args)
-                    hinstance = ctypes.windll.shell32.ShellExecuteW(
-                        None, "runas", sys.executable, params, None, 1)
-                    if int(hinstance) > 32:
-                        sys.exit(0)
-                    else:
-                        sys.exit(1)
+    if not is_admin():
+        if "--elevated" not in sys.argv:
+            if getattr(sys, 'frozen', False):
+                script_path = sys.executable
+            else:
+                script_path = os.path.abspath(sys.argv[0])
+            args = [script_path] + sys.argv[1:] + ["--elevated"]
+            try:
+                params = shlex.join(args)
+            except AttributeError:
+                params = " ".join(f'"{a}"' for a in args)
+            hinstance = ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", sys.executable, params, None, 1)
+            if int(hinstance) > 32:
+                sys.exit(0)
+            else:
+                sys.exit(1)
     ft.app(target=main)

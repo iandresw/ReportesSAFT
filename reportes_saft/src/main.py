@@ -1,139 +1,15 @@
 import flet as ft
-
+from views.login_view import PantallaLogin
 from contexts.app_context import AppContext
-from views.permiso_operacion_view import VistaPermisoOperacion
-from ui.ui_container import create_container_rail
-from views.about_view import VistaAbout
-from views.reportes_view import VistaReportes
-from ui.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
-from services.parametro_service import ParametroService
 
 
 def main(page: ft.Page):
+    page.title = "Login SAFT"
     context = AppContext()
-    text_color = color_texto()
-    bg_color = color_bg()
-    bg_2_color = color_bg_2()
-    shadow_color = color_shadow()
-    context.init_saft()
-    parametro_service = ParametroService(context.conexion_saft)
-    datos_muni = parametro_service.obtener_datos_municipalidad()
-    datos_system = parametro_service.obtener_datos_systema()
-    # --- Configuración ventana ---
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.window.icon = "assets/icon.ico"
-    # page.window.maximizable = True
-    # page.window.resizable = False
-    # x_height = 680
-    # x_width = 600
-    # page.window.width = x_width
-    # page.window.height = x_height
-    # page.window.max_height = x_height
-    # page.window.min_height = x_height
-    # page.window.max_width = x_width
-    # page.window.min_width = x_width
-    municipalidad = datos_muni['NombreMuni'].rstrip().replace(
-        "Municipalidad de", "")
-
-    # --- Título superior ---
-    titulo_muni = ft.Text(
-        f"Municipalidad de {municipalidad} - {datos_muni['NombreDepto'].replace(" ", "")}",
-        size=24,
-        weight=ft.FontWeight.BOLD,
-        text_align=ft.TextAlign.CENTER,
-        color=text_color
-    )
-
-    # --- Crear las vistas ---
-    view_reportes = VistaReportes(page, context).build()
-    view_about = VistaAbout(page, context).build()
-    view_permiso_operacion = VistaPermisoOperacion(page, context).build()
-
-    # --- Contenedor dinámico donde se cargan las vistas ---
-    main_content = ft.Container(
-        expand=True,
-        content=view_reportes  # vista inicial
-    )
-
-    # --- Función para cambiar vista según selección ---
-    def on_nav_change(e):
-        index = e.control.selected_index
-        if index == 0:
-            main_content.content = view_reportes
-        elif index == 1:
-            main_content.content = view_permiso_operacion
-        elif index == 2:
-            main_content.content = view_about
-        page.update()
-
-    # --- Menú lateral (NavigationRail) ---
-    rail = ft.NavigationRail(
-        selected_index=0,
-        label_type=ft.NavigationRailLabelType.ALL,
-        min_width=100,
-        indicator_color=bg_color,
-        indicator_shape=ft.RoundedRectangleBorder(radius=5),
-        selected_label_text_style=ft.TextStyle(),
-        bgcolor=bg_2_color,
-        leading=ft.Image(src="/saft.png", width=50),
-        group_alignment=-0.9,
-        destinations=[
-            ft.NavigationRailDestination(
-                icon=ft.Icon(ft.Icons.VIEW_COMFORTABLE_OUTLINED,
-                             color=text_color, size=20),
-                selected_icon=ft.Icon(
-                    ft.Icons.VIEW_COMFORTABLE_ROUNDED, color=text_color, size=20),
-                label_content=ft.Text(
-                    "Reportes",  color=text_color, size=11, text_align=ft.TextAlign.CENTER),
-                indicator_color=shadow_color,
-            ),
-            ft.NavigationRailDestination(
-                icon=ft.Icon(ft.Icons.ADD_HOME_WORK_OUTLINED,
-                             color=text_color, size=20),
-                selected_icon=ft.Icon(
-                    ft.Icons.ADD_HOME_WORK_ROUNDED, color=text_color, size=20),
-                label_content=ft.Text(
-                    "Permiso Operación.", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
-                indicator_color=shadow_color,
-            ),
-            ft.NavigationRailDestination(
-                icon=ft.Icon(ft.Icons.ARCHIVE_OUTLINED,
-                             color=text_color, size=20),
-                selected_icon=ft.Icon(
-                    ft.Icons.ARCHIVE_ROUNDED, color=text_color, size=20),
-                label_content=ft.Text(
-                    "Acerca De", color=text_color, size=11, text_align=ft.TextAlign.CENTER),
-                indicator_color=shadow_color,
-            ),
-        ],
-        on_change=on_nav_change,
-    )
-
-    con_rail = create_container_rail(
-        content=rail,
-        expand=False
-    )
-    # --- Fondo principal ---
-    page.bgcolor = bg_color
-
-    # --- Layout general ---
-    page.add(
-        ft.Column(
-            [
-                ft.Row([titulo_muni]),
-                ft.Row(
-                    [
-                        con_rail,
-                        ft.VerticalDivider(width=2),
-                        main_content,  # donde se muestran las vistas
-                    ],
-                    expand=True,
-                ),
-            ],
-            expand=True,
-        )
-    )
+    context.init_services()
+    login_view = PantallaLogin(page, context)
+    page.add(login_view.build())
 
 
-ft.app(target=main)
+if __name__ == "__main__":
+    ft.app(target=main)

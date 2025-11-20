@@ -1,5 +1,6 @@
 import flet as ft
 import os
+import logging
 import webbrowser
 import asyncio
 from ui.ui_alertas import AlertaGeneral
@@ -19,6 +20,14 @@ from reports.trancicion_report import TrancicionReport
 from reports.mora_sp_report import MoraSPReport
 from reports.mora_ics_report import MoraICSReport
 from reports.mora_bi_report import MoraBIReport
+
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    filename="logs/logs_rpt_py.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 class VistaReportes:
@@ -87,7 +96,6 @@ class VistaReportes:
                 self.btn_mora_sp,
             ],
             expand=True,
-            height=538,
             col=12
         )
 
@@ -102,12 +110,12 @@ class VistaReportes:
                 self.btn_trancicon_sp_detalle
             ],
             expand=True,
-            height=538,
             col=12
         )
 
         self.frame_mora_rpt = ft.Container(
             expand=True,
+            alignment=ft.Alignment(1, 1),
             content=ft.ResponsiveRow(
                 controls=[
                     self.conten_titulo_mora_rpt,
@@ -118,7 +126,7 @@ class VistaReportes:
         )
         self.frame_otros_rpt = ft.Container(
             expand=True,
-            alignment=ft.Alignment(0, 1),
+            alignment=ft.Alignment(1, 1),
             content=ft.ResponsiveRow(
                 controls=[
                     self.conten_titulo_otras_rpt,
@@ -134,7 +142,7 @@ class VistaReportes:
                     ft.Row([
                         self.frame_otros_rpt,
                         self.frame_mora_rpt,
-                    ])
+                    ],)
                 ]
             )
 
@@ -153,6 +161,7 @@ class VistaReportes:
 
     def cargar_snack_errr(self, error):
         snack_err = snack_error(str(error))
+        logging.error(f"Error Generar Reporte: {error}", exc_info=True)
         self.page.open(snack_err)
         self.page.update()
 

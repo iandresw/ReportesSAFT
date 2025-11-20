@@ -5,15 +5,13 @@ from repositories.trancicion_ics_repository import TrancicionICSRepository
 from repositories.trancicion_amb_reposiory import TrancicionAMBRepository
 from repositories.trancicion_ps_reposiory import TrancicionSPRepository
 
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
-from openpyxl.drawing.image import Image as XLImage
+
 from datetime import datetime
 from repositories.aldea_repository import AldeaRepository
 from services.parametro_service import ParametroService
 from reports.trancicion_det_ics_report import TrancicionICSDetalleReport
+from reports.trancicion_det_sp_report import TrancicionSPDetalleReport
+from reports.trancicion_det_bi_report import TrancicionBIDetalleReport
 
 
 class TrancicionTraspasoDetalleService:
@@ -27,6 +25,8 @@ class TrancicionTraspasoDetalleService:
         self.parametro_systema = ParametroService(conexion)
         self.sys = sistem
         self.rpt_excel_ics = TrancicionICSDetalleReport(self.sys)
+        self.rpt_excel_sp = TrancicionSPDetalleReport(self.sys)
+        self.rpt_excel_bi = TrancicionBIDetalleReport(self.sys)
         self.codAldea = self.repo_aldea.obtener_aldea_urbana()
         self.anio = datetime.now().year
         self.anio_inicio = 2022
@@ -91,33 +91,8 @@ class TrancicionTraspasoDetalleService:
         bi_dec_rurales_final = self.repo_trancicion_bi.obtener_dec_anio_fin_detalle(
             1)
 
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            pd.DataFrame(bi_urbano).to_excel(
-                writer, sheet_name="BI Urbano", index=False)
-            pd.DataFrame(bi_rural).to_excel(
-                writer, sheet_name="BI Rural", index=False)
-            pd.DataFrame(bi_urbano_act).to_excel(
-                writer, sheet_name="BI Urbano Activos", index=False)
-            pd.DataFrame(bi_rurales_act).to_excel(
-                writer, sheet_name="BI Rural Activos", index=False)
-
-            pd.DataFrame(bi_tec_urbano_inicio).to_excel(
-                writer, sheet_name="BI Urbano Inicio Tec.", index=False)
-            pd.DataFrame(bi_tec_rural_inicio).to_excel(
-                writer, sheet_name="BI Rural Inicio Tec.", index=False)
-            pd.DataFrame(bi_tec_urbano_final).to_excel(
-                writer, sheet_name="BI Urbano Final Tec", index=False)
-            pd.DataFrame(bi_tec_rurales_final).to_excel(
-                writer, sheet_name="BI Rural Final Tec", index=False)
-
-            pd.DataFrame(bi_dec_rural_inicio).to_excel(
-                writer, sheet_name="BI  Urbano Inicio Declarado.", index=False)
-            pd.DataFrame(bi_dec_urbano_inicio).to_excel(
-                writer, sheet_name="BI  Rural Inicio Declarado.", index=False)
-            pd.DataFrame(bi_dec_urbano_final).to_excel(
-                writer, sheet_name="BI Urbano Final Declarado", index=False)
-            pd.DataFrame(bi_dec_rurales_final).to_excel(
-                writer, sheet_name="BI Rural Final Declarado", index=False)
+        ruta_excel = self.rpt_excel_bi.generar_excel(bi_urbano, bi_rural, bi_urbano_act, bi_rurales_act, bi_tec_urbano_inicio, bi_tec_rural_inicio,
+                                                     bi_tec_urbano_final, bi_tec_rurales_final, bi_dec_rural_inicio,  bi_dec_urbano_inicio, bi_dec_urbano_final, bi_dec_rurales_final, ruta_excel, "BI")
 
         return ruta_excel
 
@@ -234,16 +209,7 @@ class TrancicionTraspasoDetalleService:
                     "inicio": servicio_inicio,
                     "final": servicio_final
                 }
-
-        with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
-            for nombre_servicio, datos in resultados.items():
-                hoja_inicio = f"{nombre_servicio} inicio"
-                hoja_final = f"{nombre_servicio} final"
-                if datos["inicio"]:
-                    pd.DataFrame(datos["inicio"]).to_excel(
-                        writer, sheet_name=hoja_inicio[:30], index=False)
-                if datos["final"]:
-                    pd.DataFrame(datos["final"]).to_excel(
-                        writer, sheet_name=hoja_final[:30], index=False)
+        ruta_excel = self.rpt_excel_sp.generar_excel(
+            resultados, ruta_excel, "IER")
 
         return ruta_excel

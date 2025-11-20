@@ -1,4 +1,4 @@
-from flet import Container, Row, Text, Offset, Animation, AnimationCurve, MainAxisAlignment, Icon, Icons, FontWeight, TextAlign, Padding, TextField, TextStyle
+from flet import Container, Row, Text, Offset, Animation, TextField, InputBorder, AnimationCurve, MainAxisAlignment, Icon, Icons, FontWeight, TextAlign, Padding, TextField, TextStyle
 from ui.ui_colors import color_borde, color_bg, color_texto
 
 
@@ -66,3 +66,27 @@ def create_texFiel_fijas(label_text="", visible=True, read_only=True, width=None
         label_style=TextStyle(
             size=text_sise, font_family="Tahoma", color=text_color, weight=FontWeight.W_400,),
         text_style=TextStyle(size=text_sise, font_family="Tahoma", color=text_color, weight=FontWeight.W_400,),)
+
+
+def text_usuario() -> TextField:
+    return TextField(
+        width=280,
+        height=40,
+        hint_text='Usuario SAFT',
+        border=InputBorder.UNDERLINE,
+        color='black',
+        prefix_icon=Icons.PERSON_2,
+    )
+
+
+def text_usuario_password() -> TextField:
+    return TextField(
+        width=280,
+        height=40,
+        hint_text='Contraseña',
+        border=InputBorder.UNDERLINE,
+        color='black',
+        prefix_icon=Icons.LOCK,
+        can_reveal_password=True,
+        password=True,
+    )

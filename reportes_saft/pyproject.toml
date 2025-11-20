@@ -5,7 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-    { name = "Andres Bejarano - AMHON", email = "abejarano@amhon.org" }
+    { name = "Asociación de Municipios de Honduras (AMHON)", email = "abejarano@amhon.org" }
 ]
 dependencies = [
   "flet==0.28.3",
@@ -21,14 +21,17 @@ dependencies = [
 [tool.flet]
 # org name in reverse domain name notation, e.g. "com.mycompany".
 # Combined with project.name to build bundle ID for iOS and Android apps
-org = "com.amhon"
+org = "hn.amhon"
+compile.app = true 
+compile.packages = true 
+compile.cleanup = true 
 
 # project display name that is used as an app title on Android and iOS home screens,
 # shown in window titles and about app dialogs on desktop.
 product = "reportes-saft"
 
 # company name to display in about app dialogs
-company = "Flet"
+company = "AMHON"
 
 # copyright text to display in about app dialogs
 copyright = "Copyright (C) Asociacion de Municipios de Honduras - (AMHON) 2025"
@@ -36,6 +39,11 @@ copyright = "Copyright (C) Asociacion de Municipios de Honduras - (AMHON) 2025"
 [tool.flet.app]
 path = "src"
 module-name = "main"
+
+[tool.flet.app.startup_screen]
+show = true
+message = "Iniciando, espere un momento…"
+
 
 [tool.uv]
 dev-dependencies = [

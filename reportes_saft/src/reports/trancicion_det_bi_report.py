@@ -5,12 +5,12 @@ from openpyxl.drawing.image import Image as XLImage
 from datetime import datetime
 
 
-class TrancicionICSDetalleReport:
+class TrancicionBIDetalleReport:
     def __init__(self,  municipio,  municipio_admin=False):
         self.municipio = municipio
         self.muni_admin = municipio_admin
 
-    def generar_excel(self, ics_urbano, ics_rural, ics_urbano_act, ics_rurales_act, ruta_excel: str, titulo_rpt: str):
+    def generar_excel(self, bi_urbano, bi_rural, bi_urbano_act, bi_rurales_act, bi_tec_urbano_inicio, bi_tec_rural_inicio, bi_tec_urbano_final, bi_tec_rurales_final, bi_dec_rural_inicio,  bi_dec_urbano_inicio, bi_dec_urbano_final, bi_dec_rurales_final, ruta_excel: str, titulo_rpt: str):
         header_fill = PatternFill(
             start_color="1F4E78", end_color="1F4E78", fill_type="solid")
         header_font = Font(color="FFFFFF", bold=True)
@@ -23,10 +23,21 @@ class TrancicionICSDetalleReport:
 
         with pd.ExcelWriter(ruta_excel, engine="openpyxl") as writer:
             datos = {
-                f"{titulo_rpt} Urbano": pd.DataFrame(ics_urbano),
-                f"{titulo_rpt} Rural": pd.DataFrame(ics_rural),
-                f"{titulo_rpt} Urbano Activos": pd.DataFrame(ics_urbano_act),
-                f"{titulo_rpt} Rural Activos": pd.DataFrame(ics_rurales_act),
+                f"{titulo_rpt} Urbano": pd.DataFrame(bi_urbano),
+                f"{titulo_rpt} Rural": pd.DataFrame(bi_rural),
+                f"{titulo_rpt} Urbano Activos": pd.DataFrame(bi_urbano_act),
+                f"{titulo_rpt} Rural Activos": pd.DataFrame(bi_rurales_act),
+
+                f"{titulo_rpt} Tecnificado Urbano Inicio": pd.DataFrame(bi_tec_urbano_inicio),
+                f"{titulo_rpt} Tecnificado Rural Inicio": pd.DataFrame(bi_tec_rural_inicio),
+                f"{titulo_rpt} Tecnificado Urbano Final": pd.DataFrame(bi_tec_urbano_final),
+                f"{titulo_rpt} Tecnificado Rural Final": pd.DataFrame(bi_tec_rurales_final),
+
+                f"{titulo_rpt} Declarado Urbano Inicio": pd.DataFrame(bi_dec_urbano_inicio),
+                f"{titulo_rpt} Declarado Rural Inicio": pd.DataFrame(bi_dec_rural_inicio),
+                f"{titulo_rpt} Declarado Urbano Final": pd.DataFrame(bi_dec_urbano_final),
+                f"{titulo_rpt} Declarado Rural Final": pd.DataFrame(bi_dec_rurales_final),
+
             }
 
             for nombre_hoja, df in datos.items():

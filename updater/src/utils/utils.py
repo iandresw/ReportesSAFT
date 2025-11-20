@@ -8,6 +8,7 @@ URL_ZIP = "https://drive.usercontent.google.com/download?id=1qdcEkhAj50oRiZFmVpd
 APP_DIR = r"C:\Program Files (x86)\SAFT\reportes_py"
 VERSION_FILE = os.path.join(APP_DIR, "version.py")
 EXE_NAME = "reportes_saft.exe"
+EXE_UPDATER = "updateSAFT.exe"
 
 
 def is_admin():
@@ -49,4 +50,10 @@ def is_app_running():
 def close_app():
     """Cierra reportes_saft.exe si está abierta."""
     subprocess.run(["taskkill", "/f", "/im", EXE_NAME],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def close_updater():
+    """Cierra updateSAFT.exe si está abierta."""
+    subprocess.run(["taskkill", "/f", "/im", EXE_UPDATER],
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

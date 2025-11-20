@@ -10,10 +10,10 @@ APP_DIR = r"C:\Program Files (x86)\SAFT\reportes_py"
 EXCLUDE = ["config.ini", "user_data", "updater"]
 
 
-def descargar_actualizacion(self):
+def descargar_actualizacion(instancia):
     tmp_dir = tempfile.mkdtemp(prefix="update_")
     zip_path = os.path.join(tmp_dir, "update.zip")
-    self.update_status("Descargando nueva versión...")
+    instancia.update_status("Descargando nueva versión...")
     with requests.get(URL_ZIP, stream=True, timeout=60) as r:
         r.raise_for_status()
         total = int(r.headers.get("content-length", 0))
@@ -24,19 +24,22 @@ def descargar_actualizacion(self):
                     f.write(chunk)
                     descargado += len(chunk)
                     if total:
-                        self.progress.value = descargado / total
-                        self.page.update()
+                        instancia.progress.value = descargado / total
+                        instancia.page.update()
+    instancia.progress.value = None
+    instancia.progress.update()
 
-    self.update_status("Extrayendo archivos...")
+    instancia.update_status("Extrayendo archivos...")
     with zipfile.ZipFile(zip_path, "r") as z:
         z.extractall(tmp_dir)
     time.sleep(0.5)
     return tmp_dir
 
 
-def reemplazar_archivos(self, src_dir):
-    self.update_status("Actualizando archivos...")
-
+def reemplazar_archivos(instancia, src_dir):
+    instancia.update_status("Actualizando archivos...")
+    instancia.progress.value = None
+    instancia.progress.update()
     for root, dirs, files in os.walk(src_dir):
         rel_path = os.path.relpath(root, src_dir)
         dest_dir = os.path.join(APP_DIR, rel_path)
@@ -61,4 +64,4 @@ def reemplazar_archivos(self, src_dir):
                     print(f"Error copiando {file}: {e}")
                     break
 
-    self.update_status("Archivos actualizados correctamente.", busy=False)
+    instancia.update_status("Archivos actualizados correctamente.", busy=False)

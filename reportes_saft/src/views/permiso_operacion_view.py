@@ -13,6 +13,7 @@ from services.parametro_service import ParametroService
 from services.permiso_operacion_services import PermisooperacionServices
 from reports.permiso_operacion_report import PermisoOperacionReport
 from reports.per_ope_la_esperanza import PerOpeLaEsperanzaReport
+from reports.per_ope_concepcion_report import PerOpeConcepcionReport
 
 
 class VistaPermisoOperacion:
@@ -277,7 +278,10 @@ class VistaPermisoOperacion:
             justicia = self.firma.value
             if self.datos_muni["CodMuni"] == "0512":
                 reporte = PerOpeLaEsperanzaReport(
-                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)
+                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)  # type: ignore
+            elif self.datos_muni["CodMuni"] == "1403":
+                reporte = PerOpeConcepcionReport(
+                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)  # type: ignore
             else:
                 reporte = PermisoOperacionReport(
                     self.permiso, self.datos_muni, "", justicia)

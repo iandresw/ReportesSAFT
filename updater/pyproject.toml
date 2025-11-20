@@ -1,0 +1,45 @@
+
+
+[project]
+name = "updateSAFT"
+version = "1.0.0"
+description = "Ejecutable que permite la descarga y actualización del sistema SAFT"
+authors = [{name = "Asociación de Municipios de Honduras (AMHON)"}]
+
+# Dependencias necesarias en producción (solo si tu EXE no empaqueta todo)
+dependencies = [
+      "flet==0.28.3",
+  "python-dotenv",
+  "requests",
+
+]
+
+[tool.flet.app]
+path = "src"
+module-name = "main"
+
+[tool.flet.app.startup_screen]
+show = true
+message = "Iniciando, espere un momento…"
+
+[tool.flet]
+# org name in reverse domain name notation, e.g. "com.mycompany".
+# Combined with project.name to build bundle ID for iOS and Android apps
+org = "hn.amhon"
+compile.app = true 
+compile.packages = true 
+compile.cleanup = true 
+
+
+
+# Dependencias para desarrollo (no se incluyen en el EXE)
+[tool.uv]
+dev-dependencies = [
+    "flet[all]==0.28.3"  # Necesario para correr y probar la app en Python
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+flet = {extras = ["all"], version = "0.28.3"}  # Igual, solo desarrollo
