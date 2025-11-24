@@ -190,6 +190,79 @@ def estilos_parrafo():
         spaceBefore=0,
         spaceAfter=5
     ))
+
+    estilos.add(ParagraphStyle(
+        name='concepcion_telefono',
+        fontSize=11,
+        textColor="#0563C1",
+        fontName="Helvetica",
+        leading=13,
+        alignment=1,  # centradp
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='concepcion_title_ope',
+        fontSize=24,
+        textColor=colors.black,
+        fontName="Helvetica",
+        leading=26,
+        alignment=1,  # centrado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+
+    estilos.add(ParagraphStyle(
+        name='concepcion_parrafo',
+        fontSize=14,
+        textColor=colors.black,
+        fontName="Helvetica",
+        leading=16,
+        alignment=0,  # izquierda
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+
+    estilos.add(ParagraphStyle(
+        name='concepcion_campos_firma',
+        fontSize=14,
+        textColor=colors.black,
+        fontName="Helvetica-Bold",
+        leading=14,
+        alignment=1,  # centrado
+        spaceBefore=0,
+        spaceAfter=0
+    ))
+    estilos.add(ParagraphStyle(
+        name='concepcion_title',
+        fontSize=28,
+        textColor=colors.black,
+        fontName="Helvetica-Bold",
+        leading=30,
+        alignment=1,  # centrado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='concepcion_campos',
+        fontSize=14,
+        textColor=colors.black,
+        fontName="Helvetica",
+        leading=16,
+        alignment=0,  # izquierda
+        spaceBefore=0,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='concepcion_num_ope',
+        fontSize=12,
+        textColor=colors.black,
+        fontName="Helvetica-Bold",
+        leading=20,
+        alignment=0,  # justificado
+        spaceBefore=0,
+        spaceAfter=10
+    ))
     return estilos
 
 

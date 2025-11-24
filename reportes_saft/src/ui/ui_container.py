@@ -16,7 +16,6 @@ def create_container(controls=[], col=1, width=None, height=None, expand=None, c
                          col=12,
                          alignment=MainAxisAlignment.CENTER,         # centra verticalmente
                          horizontal_alignment=CrossAxisAlignment.CENTER,  # centra horizontalmente
-
                          expand=True)
     return Container(
         bgcolor=color_bg_2(),
@@ -29,9 +28,9 @@ def create_container(controls=[], col=1, width=None, height=None, expand=None, c
         #     right=BorderSide(0.5, color_border_contenedor()),
         #     bottom=BorderSide(0.5, color_border_contenedor()),
         #     left=BorderSide(0.5, color_border_contenedor())),
-        width=width,
+
         padding=10,
-        height=height,
+
         shadow=BoxShadow(
             spread_radius=1,
             blur_radius=10,

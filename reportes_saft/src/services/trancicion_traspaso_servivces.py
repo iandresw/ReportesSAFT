@@ -214,29 +214,67 @@ class TrancicionTraspasoService:
                       "152190207": "Servicio de Agua por Riego",
                       "152190208": "Servicio de Purificadoras de Agua Municipales",
                       "125990102": "Tasa Balanza Municipal",
-                      "125990212": "Servicio de Limpieza de solares baldíos",
                       "125990108": "Servicio de Aseo, mantenimiento de parques, calles y avenidas",
                       "125990109": "Servicio de Aseo de cementerio",
-                      "152190101": "Servicios de Documentación",
-                      "125990211": "Servicios de muellaje",
                       "125990105": "Tasa Ambiental (protección y mejoramiento del ambiente)",
                       "125990119": "Tasa por Servicios Turísticos",
                       "125990103": "Tasa Seguridad ciudadana",
                       "125990104": "Tasa Vial",
                       "125990101": "Tasa Rastro público",
-                      "125990213": "Limpieza de cementerios", }
+                      "125990213": "Limpieza de cementerios",
+                      "125990211": "Servicios de muellaje",
+                      "125990212": "Servicio de Limpieza de solares baldíos",
+                      "152190101": "Servicios de Documentación",
+                      "176301010": "Alquiler de Mercado", }
+
             sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
                 cta_sp='1521902', anio=self.anio-3)
+            dic_inicio = sp_inicio
+
+            sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
+                cta_sp='1259901', anio=self.anio-3)
+            dic_inicio.extend(sp_inicio)
+
+            sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
+                cta_sp='1259902', anio=self.anio-3)
+            dic_inicio.extend(sp_inicio)
+
+            sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
+                cta_sp='1521901', anio=self.anio-3)
+            dic_inicio.extend(sp_inicio)
+
+            sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
+                cta_sp='1763010', anio=self.anio-3)
+            dic_inicio.extend(sp_inicio)
+
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1521902')
+            dic_final = sp_final
+            sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
+                cta_sp='1259901')
+            dic_final.extend(sp_final)
+            sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
+                cta_sp='1259902')
+            dic_final.extend(sp_final)
+            sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
+                cta_sp='1521901')
+            dic_final.extend(sp_final)
+            sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
+                cta_sp='1763010')
+            dic_final.extend(sp_final)
 
-        df_inicio = pd.DataFrame(sp_inicio)
-        df_final = pd.DataFrame(sp_final)
+        df_inicio = pd.DataFrame(dic_inicio)
+
+        df_final = pd.DataFrame(dic_final)
+
         df = df_inicio.merge(df_final, on="Cuenta", how="right")
         df = df.fillna(0)
+
         for _, data_s in df.iterrows():
             cuenta = data_s['Cuenta']
             tipo = cta_sp.get(cuenta, "Servicio desconocido")
+            if tipo == "Servicio desconocido":
+                continue
             val_inicio = int(data_s.get('Total_x', data_s.get('Total_x', 0)))
             val_final = data_s.get('Total_y', 0)
 

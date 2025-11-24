@@ -27,13 +27,12 @@ class VistaPermisoOperacion:
         self.texto_color = color_texto()
         self.texto_color_2 = color_texto_2()
         self.color_parrafo = color_texto_parrafo()
-
         self.parametro_service = ParametroService(self.app.conexion_saft)
         self.datos_muni = self.parametro_service.obtener_datos_municipalidad()
         self.datos_muni_admin = self.parametro_service.obtener_datos_municipalidad_admin()
         self.datos_system = self.parametro_service.obtener_datos_systema()
         self.repo_permiso = PermisooperacionServices(
-            self.app.conexion_saft, self.datos_system)
+            self.app, self.datos_system)
 
         self.chk_firma_justicia = createCheckBox("¿Firma Justicia?")
 
@@ -48,7 +47,7 @@ class VistaPermisoOperacion:
                 create_radio(value="1", label_text="Firma Justicia Municipal"),
                 create_radio(value="2", label_text="Firma Unidad Ambiental")],),
         )
-        if self.datos_muni["CodMuni"] == "0512":
+        if self.datos_muni["CodMuni"] == "1001":
             self.firma = self.rd_firma
         else:
             self.firma = self.chk_firma_justicia
@@ -98,99 +97,85 @@ class VistaPermisoOperacion:
 
         self.conten_acerca_de = create_container(
             expand=True,
-            # height=580,
             col=12,
             controls=[
-                ft.Column(
-                    alignment=self.ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=self.ft.CrossAxisAlignment.CENTER,
-                    expand=True,
+                ft.Image(src=r"\assets\saft.png"),
+                ft.Text(
+                    "PERMISO DE OPERACION DE NEGOCIOS",
+                    size=24,
+                    weight=self.ft.FontWeight.BOLD,
+                    color=self.texto_color,
+                    text_align=self.ft.TextAlign.CENTER,
+                ),
+                ft.Divider(),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_no_recibo,
+                              self.btn_consulta
+                              ],
+                ),
+                ft.Divider(),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_no_permiso,
+                              self.txt_periodo,
+                              self.txt_ini_operaion,
+                              self.txt_telefono,
+                              self.txt_num_renovacion
+                              ],
+                ),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_rtm,
+                              self.txt_rtn,
+                              self.txt_fecha_emission,
+                              ],
+                ),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_nombre_establecimiento,
+                              ],
+                ),
+
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_identidad, self.txt_nombrePropietario
+                              ],
+                ),
+
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_claveCatastral, self.txt_ubicacion
+                              ],
+                ),
+
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.txt_act_economica, self.txt_tipo_establecimiento
+                              ],
+                ),
+                ft.Divider(),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
                     controls=[
-                        ft.Image(src=r"\assets\saft.png"),
-                        ft.Text(
-                            "PERMISO DE OPERACION DE NEGOCIOS",
-                            size=24,
-                            weight=self.ft.FontWeight.BOLD,
-                            color=self.texto_color,
-                            text_align=self.ft.TextAlign.CENTER,
-                        ),
+                        self.firma,
                         ft.Divider(),
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_no_recibo,
-                                      self.btn_consulta
-                                      ],
-                        ),
-
-                        ft.Divider(),
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_no_permiso,
-                                      self.txt_periodo,
-                                      self.txt_ini_operaion,
-                                      self.txt_telefono,
-                                      self.txt_num_renovacion
-                                      ],
-                        ),
-
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_rtm,
-                                      self.txt_rtn,
-                                      self.txt_fecha_emission,
-                                      ],
-                        ),
-
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_nombre_establecimiento,
-                                      ],
-                        ),
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_identidad, self.txt_nombrePropietario
-                                      ],
-                        ),
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_claveCatastral, self.txt_ubicacion
-                                      ],
-                        ),
-
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.txt_act_economica, self.txt_tipo_establecimiento
-                                      ],
-                        ),
-                        ft.Divider(),
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[
-                                self.firma,
-                                ft.Divider(),
-                                self.rd_tipo_solcitud,
-                            ],
-                        ),
-                        ft.Divider(),
-                        ft.Row(
-                            alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                            controls=[self.btn_guardar, self.btn_editar, self.btn_imprimir
-                                      ],
-                        ),
+                        self.rd_tipo_solcitud,
                     ],
-                )
+                ),
+                ft.Divider(),
+                ft.Row(
+                    alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
+                    controls=[self.btn_guardar, self.btn_editar, self.btn_imprimir
+                              ],
+                ),
             ],
         )
         self.frame = ft.Container(
             expand=True,
             content=ft.ResponsiveRow(
+                expand=True,
                 controls=[
-
                     self.conten_acerca_de,
                 ],
                 alignment=ft.MainAxisAlignment.CENTER, col=12
@@ -198,7 +183,7 @@ class VistaPermisoOperacion:
         )
 
     def build(self):
-        return ft.Column([
+        return ft.Column(expand=True, controls=[
             self.frame
         ])
 
@@ -253,7 +238,7 @@ class VistaPermisoOperacion:
             self.btn_imprimir.disabled = False
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
-            if self.datos_muni["CodMuni"] == "0512":
+            if self.datos_muni["CodMuni"] == "1001":
                 self.firma.value = str(self.permiso.FirmaJ)
 
             else:
@@ -276,7 +261,7 @@ class VistaPermisoOperacion:
     def imprimir_rept_po(self, e):
         try:
             justicia = self.firma.value
-            if self.datos_muni["CodMuni"] == "0512":
+            if self.datos_muni["CodMuni"] == "1001":
                 reporte = PerOpeLaEsperanzaReport(
                     self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)  # type: ignore
             elif self.datos_muni["CodMuni"] == "1403":
@@ -322,7 +307,7 @@ class VistaPermisoOperacion:
             self.rd_tipo_solcitud.value = ""
             self.txt_num_renovacion.value = ""
             self.txt_no_permiso.value = ""
-            if self.datos_muni["CodMuni"] == "0512":
+            if self.datos_muni["CodMuni"] == "1001":
                 self.firma.value = "0"
             else:
                 self.firma.value = False

@@ -189,17 +189,18 @@ class TrancicionTraspasoDetalleService:
                       "152190207": "Servicio de Agua por Riego",
                       "152190208": "Servicio de Purificadoras de Agua Municipales",
                       "125990102": "Tasa Balanza Municipal",
-                      "125990212": "Servicio de Limpieza de solares baldíos",
                       "125990108": "Servicio de Aseo, mantenimiento de parques, calles y avenidas",
                       "125990109": "Servicio de Aseo de cementerio",
-                      "152190101": "Servicios de Documentación",
-                      "125990211": "Servicios de muellaje",
                       "125990105": "Tasa Ambiental (protección y mejoramiento del ambiente)",
                       "125990119": "Tasa por Servicios Turísticos",
                       "125990103": "Tasa Seguridad ciudadana",
                       "125990104": "Tasa Vial",
                       "125990101": "Tasa Rastro público",
-                      "125990213": "Limpieza de cementerios", }
+                      "125990213": "Limpieza de cementerios",
+                      "125990211": "Servicios de muellaje",
+                      "125990212": "Servicio de Limpieza de solares baldíos",
+                      "152190101": "Servicios de Documentación",
+                      "176301010": "Alquiler de Mercado", }
             for cta, nombre in cta_sp.items():
                 servicio_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio_detalle(
                     cta_sp=cta, anio=self.anio_inicio)

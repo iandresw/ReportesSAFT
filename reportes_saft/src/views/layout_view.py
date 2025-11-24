@@ -24,24 +24,23 @@ class UILayout(ft.Container):
         self.page = page
         self.x_width = 900
         self.x_height = 710
-        self.page.padding = 15
-        self.context = context
-        self.context.init_saft()
-
-        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        self.page.window.icon = "assets/icon.ico"
-        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.page.window.width = 900
+        self.page.window.height = 90
+        self.page.window.center()
+        self.page.window.max_height = 1080
+        self.page.window.min_height = 1
+        self.page.window.max_width = 1080
+        self.page.window.min_width = 1
         self.page.window.maximizable = True
         self.page.window.minimizable = True
         self.page.window.resizable = True
         self.page.title = "Reportes SAFT"
-        self.page.window.height = self.x_height
-
-        self.page.window.width = self.x_width
-
-        self.page.window.center()
+        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.page.padding = 15
+        self.context = context
+        self.context.init_saft()
+        self.page.window.icon = "assets/icon.ico"
         self.page.update()
         text_color = color_texto()
         bg_color = color_bg()
@@ -137,13 +136,13 @@ class UILayout(ft.Container):
         self.page.bgcolor = bg_color
 
     def build(self):  # type: ignore
-        self.page.title = "Reportes SAFT"  # type: ignore
+        # self.page.title = "Reportes SAFT"  # type: ignore
 
-        self.page.window.max_height = 1024
-        self.page.window.min_height = 1
-        self.page.window.max_width = 1024
-        self.page.window.min_width = 1
-        self.page.update()
+        # self.page.window.max_height = 1024
+        # self.page.window.min_height = 1
+        # self.page.window.max_width = 1024
+        # self.page.window.min_width = 1
+        # self.page.update()
         return ft.Column(
             [
                 ft.Row([self.titulo_muni]),

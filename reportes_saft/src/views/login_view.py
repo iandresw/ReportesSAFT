@@ -1,4 +1,5 @@
 import flet as ft
+from ui.ui_checkBox import createCheckBox
 from utils.credenciales import ManejadorCredenciales
 from ui.ui_text import text_usuario, text_usuario_password
 from ui.ui_colors import color_bg, color_bg_2, color_texto, color_texto_2, color_texto_parrafo
@@ -13,8 +14,8 @@ class PantallaLogin:
         self.pass_input = text_usuario_password()
 
         self.msg = ft.Text("", color="red", size=14)
-        self.checkbox = ft.Checkbox(
-            label="Recordar contraseña", check_color='black', height=23)
+        self.checkbox = createCheckBox(
+            label_text="Recordar contraseña")
 
         # Configuración ventana
         self.x_width = 720
@@ -43,13 +44,17 @@ class PantallaLogin:
         usuario: str = str(self.usuario_input.value)
         contrasena = str(self.pass_input.value)
         if self.context.auth_service.login(usuario, contrasena):
+            usuario_obj = self.context.auth_service.obtener_datos_usuario(
+                usuario)
+            if usuario_obj:
+                self.context.usuario_actual = usuario_obj
             if self.checkbox.value:
                 ManejadorCredenciales.guardar(usuario, contrasena)
             else:
                 ManejadorCredenciales.borrar()
             self.msg.value = "Usuario Ingresado"
             self.page.update()
-            self.page.clean()
+            self.page.controls.clear()
 
             index = UILayout(self.page, self.context)
             self.page.add(index.build())
@@ -90,7 +95,7 @@ class PantallaLogin:
         cred = ManejadorCredenciales.cargar()
         self.usuario_input.value = cred["usuario"]
         self.pass_input.value = cred["password"]
-        self.checkbox.value = cred["usuario"] != ""
+        self.checkbox.value = cred["usuario"] != False
 
         self.configurar_ventana()
 

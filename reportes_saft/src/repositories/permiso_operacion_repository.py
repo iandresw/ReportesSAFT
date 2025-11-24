@@ -88,13 +88,13 @@ class PermisoOperacionReposirory:
         except Exception as e:
             return False
 
-    def insertar_tra_perm_ope(self, NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ):
-        query = """INSERT INTO Tra_PermOP (NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ) 
-        VALUES (?, ?, ?, ?, ?, ?, ?,  ?,  ?, ?, ?, ?) """
+    def insertar_tra_perm_ope(self, NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario):
+        query = """INSERT INTO Tra_PermOP (NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario) 
+        VALUES (?, ?, ?, ?, ?, ?, ?,  ?,  ?, ?, ?, ?, ?) """
         try:
             with self.conexion.cursor() as cur:
                 cur.execute(query, (NoPermiso, Periodo, Identidad, Negocio, Propietario,
-                            Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ))
+                            Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario))
                 return True
         except Exception as e:
             return False

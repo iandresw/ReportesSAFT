@@ -11,3 +11,21 @@ class UsuarioRepository():
             "SELECT COUNT(*) FROM Usuario WHERE UsuarioCod = ? AND UsuarioPass = ?", (usuario, password))
         resultado = cursor.fetchone()
         return resultado[0] > 0
+
+    def obtener_datos_usuario(self, usuario) -> Usuario | None:
+        cursor = self.conexion.obtener_cursor()
+        query = f"""
+        SELECT 
+            u.UsuarioNombre, 
+            u.Identidad, 
+            um.ModuloCod, 
+            um.UMLevel
+        FROM Usuario u
+        INNER JOIN UsuarioModulo um ON u.UsuarioCod = um.UsuarioCod
+        WHERE u.UsuarioCod = ?
+        """
+        cursor.execute(query, usuario)
+        resultado = cursor.fetchall()
+        if not resultado:
+            return None
+        return resultado

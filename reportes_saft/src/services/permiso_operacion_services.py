@@ -4,8 +4,10 @@ from datetime import datetime
 
 
 class PermisooperacionServices:
-    def __init__(self, conexion, sistem) -> None:
-        self.repo = PermisoOperacionReposirory(conexion=conexion)
+    def __init__(self, appContext, sistem) -> None:
+        self.conexion = appContext.conexion_saft
+        self.user = appContext.usuario_actual
+        self.repo = PermisoOperacionReposirory(conexion=self.conexion)
         self.sys = sistem
         self.anio = datetime.now().year
 
@@ -72,21 +74,21 @@ class PermisooperacionServices:
                                   Observacion=observ,
                                   Fecha=datetime.now(),
                                   CodAldea=datos['CodAldea'],
-                                  Usuario="",
+                                  Usuario=self.user.username,
                                   UsuarioMod="",
                                   FirmaJ=justicia,
                                   ClaveCatastro=datos['ClaveCatastro'],
                                   CodProfesion=self.tipo_cuenta(
-                                          datos['CodProfesion']),
-                                  FechaNac=datos['FechaNac'],
-                                  rtn=datos['rtn'],
-                                  Telefono=datos['Telefono'],
-                                  NumeroRenovacion=num_renovacion)
+                datos['CodProfesion']),
+                FechaNac=datos['FechaNac'],
+                rtn=datos['rtn'],
+                Telefono=datos['Telefono'],
+                NumeroRenovacion=num_renovacion)
         return permiso  # type: ignore
 
     def guardar_perm_operacion(self, data: Tra_PermOpe):
         return self.repo.insertar_tra_perm_ope(data.NoPermiso, data.Periodo, data.Identidad, data.Negocio, data.Propietario,
-                                               data.Ubicacion, data.Actividad, data.Observacion, data.Fecha, data.CodAldea, data.NumRecibo, data.FirmaJ)
+                                               data.Ubicacion, data.Actividad, data.Observacion, data.Fecha, data.CodAldea, data.NumRecibo, data.FirmaJ, data.Usuario)
 
     def existe_po(self, num_recibo: int):
         return self.repo.existe_recibo(num_recibo=num_recibo)

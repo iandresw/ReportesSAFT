@@ -1,4 +1,4 @@
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.fonts import addMapping
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image
@@ -6,78 +6,18 @@ from reportlab.graphics.barcode import qr
 from reportlab.graphics.shapes import Drawing
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.units import cm
 from models.tra_permop import Tra_PermOpe
-from ui.ui_style_table import table_per_ope, estilos_parrafo, table_per_ope_2
+from ui.ui_style_table import estilos_parrafo
 import os
 import locale
 import json
 import qrcode
 from io import BytesIO
-from reportlab.lib.pagesizes import letter, landscape
 from reportlab.pdfgen import canvas
 
 
-def add_background(canvas, doc, image_path):
-    # Dimensiones de media carta en puntos (pulgadas * 72)
-    width, height = letter  # Página completa letter
-    half_height = height / 2  # Media carta, horizontalmente en vertical
-    canvas.drawImage(
-        image_path,
-        0, 0,  # origen en la parte superior
-        width=width,
-        height=458.64,
-        preserveAspectRatio=True,
-        mask='auto'
-    )
-
-
 locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
-# ==== Registrar fuentes Malgun desde carpeta local ====
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# sube un nivel desde reports/
-FONTS_DIR = os.path.join(BASE_DIR, "..", "fonts")
-
-# Rutas de fuentes
-font_regular = os.path.join(FONTS_DIR, "malgun.ttf")
-font_bold = os.path.join(FONTS_DIR, "malgunbd.ttf")
-font_GOTHICB = os.path.join(FONTS_DIR, "GOTHICB.TTF")
-font_GOTHICB0 = os.path.join(FONTS_DIR, "GOTHICB0.TTF")
-font_Jhenghei = os.path.join(FONTS_DIR, "Jhenghei.ttf")
-font_Century_Gothic = os.path.join(FONTS_DIR, "Century-Gothic.ttf")
-font_arial_rounded_mt = os.path.join(
-    FONTS_DIR, "Arial-Rounded-MT-Bold-Bold.ttf")
-font_arial_unicode_ms = os.path.join(FONTS_DIR, "Arial-Unicode-MS-Regular.ttf")
-font_britannic_bold = os.path.join(FONTS_DIR, "Britannic-Bold-Bold.ttf")
-# Registrar fuentes si existen
-# Registrar fuentes si existen
-if os.path.exists(font_regular):
-    pdfmetrics.registerFont(TTFont('Malgun', font_regular))
-    addMapping('Malgun', 0, 0, 'Malgun')  # Normal
-
-if os.path.exists(font_bold):
-    pdfmetrics.registerFont(TTFont('Malgun-Bold', font_bold))
-    addMapping('Malgun', 1, 0, 'Malgun-Bold')  # Bold
-
-if os.path.exists(font_GOTHICB):
-    pdfmetrics.registerFont(TTFont('GOTHICB', font_GOTHICB))
-    addMapping('GOTHICB', 1, 0, 'GOTHICB')  # Bold
-
-if os.path.exists(font_GOTHICB0):
-    pdfmetrics.registerFont(TTFont('GOTHICB0', font_GOTHICB0))
-    addMapping('GOTHICB', 0, 0, 'GOTHICB0')  # Regular
-
-if os.path.exists(font_arial_rounded_mt):
-    pdfmetrics.registerFont(
-        TTFont('Arial-Rounded-MT-Bold', font_arial_rounded_mt))
-    addMapping('Arial-Rounded-MT', 1, 0, 'Arial-Rounded-MT-Bold')
-
-if os.path.exists(font_arial_unicode_ms):
-    pdfmetrics.registerFont(TTFont('Arial-Unicode-MS', font_arial_unicode_ms))
-    addMapping('Arial-Unicode', 0, 0, 'Arial-Unicode-MS')
-
-if os.path.exists(font_britannic_bold):
-    pdfmetrics.registerFont(TTFont('Britannic-Bold', font_britannic_bold))
-    addMapping('Britannic', 1, 0, 'Britannic-Bold')
 
 
 class PerOpeConcepcionReport:
@@ -87,13 +27,43 @@ class PerOpeConcepcionReport:
         self.titulo = titulo_reporte
         self.justicia_firma = firma_justicia
         self.muni_admin = municipio_admin
+        self.margen = 1.27 * cm
+
+    def dibujar_borde(self, canvas, doc):
+        w, h = landscape(letter)
+
+        margen = 10  # borde separado 10px del borde real
+
+        canvas.saveState()
+        canvas.setLineWidth(3)
+        canvas.setStrokeColor(colors.gray)
+
+        # borde exterior
+        canvas.rect(
+            margen,
+            margen,
+            w - 2 * margen,
+            h - 2 * margen
+        )
+
+        # borde interno decorativo
+        canvas.setLineWidth(1.5)
+        canvas.setStrokeColor(colors.lightblue)
+        canvas.rect(
+            margen + 10,
+            margen + 10,
+            w - 2 * (margen + 10),
+            h - 2 * (margen + 10)
+        )
+
+        canvas.restoreState()
 
     def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
-        doc = SimpleDocTemplate(ruta_salida, pagesize=(612, 460),
-                                leftMargin=40,
-                                rightMargin=40,
-                                topMargin=50,
-                                bottomMargin=0)
+        doc = SimpleDocTemplate(ruta_salida, pagesize=landscape(letter),
+                                leftMargin=self.margen,
+                                rightMargin=self.margen,
+                                topMargin=self.margen,
+                                bottomMargin=self.margen)
         elementos = []
         permiso_datos = json.dumps({
             "permiso": self.datos.NumRecibo,
@@ -111,59 +81,76 @@ class PerOpeConcepcionReport:
         anio = ahora.year
 
         municipalidad = Paragraph(
-            f"ALCALDIA MUNICIPAL DE LA ESPERANZA", estilos["la_esperanza_title"],)
-        titulo_po = Paragraph(
-            f"PERMISO DE OPERACIÓN DE NEGOCIOS {self.datos.Periodo}", estilos["la_esperanza_title_ope"],)
+            f"{self.muni_admin["NombreEmpresa"].upper()}", estilos["concepcion_title"],)
         email = Paragraph(
-            f"E-Mail: {self.municipio["Email"]}, Tel.{self.municipio["Telefono"]}", estilos["la_esperanza_telefono"],)
+            f"E-Mail: {self.municipio["Email"].lower()}, Tel.{self.municipio["Telefono"]}", estilos["concepcion_telefono"],)
+
+        titulo_po = Paragraph(
+            f"PERMISO DE APERTURA Y OPERACIÓN DEL NEGOCIO", estilos["concepcion_title_ope"],)
+        fila_titulo_per = [titulo_po]
+        tabla_titulo_po = Table([fila_titulo_per], colWidths=[700])
+        estilo = TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOX", (0, 0), (0, 0), 0.8, colors.grey),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ])
+        tabla_titulo_po.setStyle(estilo)
+
+        texto1 = Paragraph(
+            f"POR ESTE MEDIO SE HACE CONSTAR QUE: EL PROPIETARIO DEL ESTABLECIMIENTO A CONTINUACIÓN DETALLADO, ESTA AUTORIZADO PARA OPERAR EL SIGUIENTE NEGOCIO.", estilos["concepcion_parrafo"])
+
+        fila_texto1 = [
+            texto1
+        ]
+        tabla_texto1 = Table([fila_texto1], colWidths=[700])
+        tabla_texto1.setStyle(estilo)
+
 
 # TABLA PROPIETARIO
         fila_propitario = [
             Paragraph(f"Nombre del propietario o Rep. Legal:",
-                      estilos["la_esperanza_campos"],),
-            Paragraph(f""),
+                      estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Propietario}",
-                      estilos["la_esperanza_campos"]),
+                      estilos["concepcion_campos"]),
         ]
         fila_dni = [
-            Paragraph(f"ID Nº: ", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
+            Paragraph(f"ID Nº: ", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.idrepresentante}",
-                      estilos["la_esperanza_campos"]),
+                      estilos["concepcion_campos"]),
         ]
         fila_negocio = [
-            Paragraph(f"Nombre Empresa:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
-            Paragraph(f"{self.datos.Negocio}",
-                      estilos["la_esperanza_campos"],),
+            Paragraph(f"Nombre Empresa:", estilos["concepcion_campos"],),
+            Paragraph(f"{self.datos.Negocio}", estilos["concepcion_campos"],),
         ]
         fila_ubicacion = [
-            Paragraph(f"Ubicacion:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
+            Paragraph(f"Ubicacion:", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Direccion}",
-                      estilos["la_esperanza_campos"],),
+                      estilos["concepcion_campos"],),
         ]
         fila_actividad = [
-            Paragraph(f"Tipo de Actividad:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
+            Paragraph(f"Tipo de Actividad:", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Actividad}",
-                      estilos["la_esperanza_campos"],),
+                      estilos["concepcion_campos"],),
         ]
         fila_fecha_vence = [
-            Paragraph(f"Fecha Vencimiento:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
-            Paragraph(f"{self.datos.Actividad}",
-                      estilos["la_esperanza_campos"],),
+            Paragraph(f"Fecha Vencimiento:", estilos["concepcion_campos"],),
+            Paragraph(f"31 de Diciembre del año {self.datos.Periodo}",
+                      estilos["concepcion_campos"],),
         ]
         fila_no_recibo = [
             Paragraph(f"Serie de recibo de pago No.:",
-                      estilos["la_esperanza_campos"],),
-            Paragraph(f""),
-            Paragraph(f"{self.datos.Actividad}",
-                      estilos["la_esperanza_campos"],),
+                      estilos["concepcion_campos"],),
+            Paragraph(f"{self.datos.NumRecibo}",
+                      estilos["concepcion_campos"],),
         ]
-        fila_lugar_fecha = [Paragraph(f"{self.municipio["Email"]}, {self.municipio["Email"]} a los {dia} dias del mes de {mes} del {anio}", estilos["la_esperanza_parrafo"]),
-                            ]
+        lugar_fecha = ""
+        fila_lugar_fecha = [Paragraph(f"{self.municipio["NombreMuni"].capitalize()}, {self.municipio["NombreDepto"].capitalize()} a los {dia} dias del mes de {mes} del {anio}", estilos["concepcion_campos"]),
+
+                            ""]
 
 
 # TABLA NEGOCIO
@@ -171,15 +158,21 @@ class PerOpeConcepcionReport:
         tabla_datos = Table(
             [fila_propitario, fila_dni, fila_negocio, fila_ubicacion,
                 fila_actividad, fila_fecha_vence, fila_no_recibo, fila_lugar_fecha],
-            colWidths=[180, 20, 300]
+            colWidths=[300, 400]
         )
 
         estilo = TableStyle([
             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("SPAN", (0, 7), (1, 7)),  # Combina columnas 0 a 2 en la fila 1
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
             ("TOPPADDING", (0, 0), (-1, -1), 4),
+            # línea arriba del header
+            ("BOX", (0, 0), (-1, -1), 1, colors.grey),  # borde exterior
+
+            # Líneas horizontales internas (filas)
+            ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.grey),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             # Fondo gris para valores
             ("BACKGROUND", (0, 1), (0, -1), colors.transparent),
@@ -189,12 +182,39 @@ class PerOpeConcepcionReport:
 
 
 # TEXTOS
-        texto1 = Paragraph(
-            f"POR ESTE MEDIO SE HACE CONSTAR QUE: EL PROPIETARIO DEL ESTABLECIMIENTO A CONTINUACIÓN DETALLADO, ESTA AUTORIZADO PARA OPERAR EL SIGUIENTE NEGOCIO.", estilos["la_esperanza_parrafo"])
+
+        BASE_DIR = os.path.dirname(os.path.abspath(
+            __file__))   # carpeta donde está el .py
+        # sube un nivel → assets
+        ASSETS_DIR = os.path.join(BASE_DIR, "..", "assets")
+
+        logo_mun = Image(os.path.join(
+            ASSETS_DIR, "logo_concepcion.png"), width=(5.84*cm), height=(3.52*cm))
+        escudo_nac = Image(os.path.join(
+            ASSETS_DIR, "logo_escudo_mini.png"), width=(2.37*cm), height=(3.46*cm))
+
 
 # TABLA QR
-        num_permiso = Paragraph(
-            f"{self.datos.NoPermiso}", estilos["la_esperanza_num_ope"])
+
+        fila_tirulo = [
+
+            logo_mun,
+            None,
+            municipalidad,
+            None,
+            escudo_nac,
+
+        ]
+        tabla_encabezado = Table(
+            [fila_tirulo],
+            colWidths=[100, 50, 300, 50, 100],  # ajusta según tus márgenes
+        )
+        tabla_encabezado.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            # (Opcional) Líneas de prueba
+            # ('GRID', (0,0), (-1,-1), 0.5, colors.red)
+        ]))
 
         qr_img = qrcode.make(permiso_datos)
         buffer = BytesIO()
@@ -203,57 +223,98 @@ class PerOpeConcepcionReport:
 
         # crea Flowable Image para ReportLab
         qr_flowable = Image(buffer, width=60, height=60)
+        fila_pie = [
+            Paragraph(f"COLOCAR EN SITIO VISIBLE",
+                      estilos["concepcion_num_ope"]),
+            None,
+            Paragraph(f"No. {self.datos.NoPermiso}",
+                      estilos["concepcion_num_ope"])
+        ]
+
+        tabla_pie = Table(
+            [fila_pie],
+            colWidths=[300, 200, 200],  # ajusta según tus márgenes
+        )
+        tabla_pie.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOX", (0, 0), (0, 0), 0.8, colors.grey),
+            ("BOX", (2, 0), (2, 0), 0.8, colors.grey),
+        ]))
+
 
 # TABLA FIRMA
-
+        valores_fila_CAMPO1 = [
+            qr_flowable,
+            None,
+            None,
+            None,
+        ]
+        valores_fila_CAMPO2 = [
+            None,
+            None,
+            None,
+            None,
+        ]
+        valores_fila_CAMPO3 = [
+            None,
+            None,
+            None,
+            None,
+        ]
         valores_fila = [
+            None,
             Paragraph(f"{self.muni_admin["Alcalde"]}",
-                      estilos["la_esperanza_campos_firma"]),
-            Paragraph(""),
-            Paragraph(f"firma Juez", estilos["la_esperanza_campos_firma"]),
-            Paragraph(""),
-            Paragraph(f"{self.muni_admin["Tesorero"]}",
-                      estilos["la_esperanza_campos_firma"]),
+                      estilos["concepcion_campos_firma"]),
+            Paragraph(f"{self.muni_admin["Administrador"]}",
+                      estilos["concepcion_campos_firma"]),
+            Paragraph(f"{self.muni_admin["Tributaria"]}",
+                      estilos["concepcion_campos_firma"]),
         ]
         valores_fila_1 = [
-            Paragraph("ALCALDE MUNICIPAL",
-                      estilos["la_esperanza_campos_firma"]),
-            Paragraph(""),
-            Paragraph("Juez de Policia",
-                      estilos["la_esperanza_campos_firma"]),
-            Paragraph(""),
-            Paragraph("TESORERA MUNICIPAL",
-                      estilos["la_esperanza_campos_firma"]),
+            None,
+            Paragraph("Alcalde Municipal", estilos["concepcion_campos_firma"]),
+            Paragraph("Juez de Policía", estilos["concepcion_campos_firma"]),
+            Paragraph("Administración Tributaria",
+                      estilos["concepcion_campos_firma"]),
         ]
 
         tabla_firma = Table(
-            [valores_fila, valores_fila_1],
-            colWidths=[150, 20, 150, 20, 150],  # ajusta según tus márgenes
+            [valores_fila_CAMPO1, valores_fila_CAMPO2,
+                valores_fila_CAMPO3, valores_fila, valores_fila_1],
+            colWidths=[100,  200,  200, 200],  # ajusta según tus márgenes
         )
         tabla_firma.setStyle(TableStyle([
             ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ('SPAN', (0, 0), (0, -1)),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            # línea encima de Justicia Municipal
-            ("LINEABOVE", (0, 0), (0, 0), 1, "black"),
-            ("LINEABOVE", (2, 0), (2, 0), 1, "black"),
-            ("LINEABOVE", (4, 0), (4, 0), 1, "black"),
+            ("LINEABOVE", (1, 3), (-1, 3), 1, colors.grey),
+            ("BOX", (1, 0), (1, -1), 0.8, colors.grey),
+            ("BOX", (2, 0), (2, -1), 0.8, colors.grey),
+            ("BOX", (3, 0), (3, -1), 0.8, colors.grey),
             ("LEFTPADDING", (0, 0), (-1, -1), 6),
             ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
         ]))
 
-        elementos.append(municipalidad)
+        elementos.append(tabla_encabezado)
         elementos.append(email)
-        elementos.append(titulo_po)
-        elementos.append(texto1)
-
-        elementos.append(Spacer(1, 10))
+        elementos.append(tabla_titulo_po)
+        elementos.append(Spacer(1, 5))
+        elementos.append(tabla_texto1)
+        elementos.append(Spacer(1, 5))
         elementos.append(tabla_datos)
+        elementos.append(Spacer(1, 5))
         elementos.append(tabla_firma)
-        elementos.append(num_permiso)
-        elementos.append(Spacer(1, 40))
-
-        background_image = os.path.join(
-            BASE_DIR, "..", "assets", "per_ope_la_esperanza.png")
-        doc.build(elementos)
+        elementos.append(Spacer(1, 5))
+        elementos.append(tabla_pie)
+        elementos.append(Spacer(1, 5))
+        doc.build(
+            elementos,
+            onFirstPage=self.dibujar_borde,
+            onLaterPages=self.dibujar_borde
+        )
