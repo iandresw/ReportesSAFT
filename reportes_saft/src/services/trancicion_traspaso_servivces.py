@@ -235,35 +235,43 @@ class TrancicionTraspasoService:
 
             sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
                 cta_sp='1259901', anio=self.anio-3)
-            dic_inicio.extend(sp_inicio)
+            if sp_inicio:
+                dic_inicio.extend(sp_inicio)
 
             sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
                 cta_sp='1259902', anio=self.anio-3)
-            dic_inicio.extend(sp_inicio)
+            if sp_inicio:
+                dic_inicio.extend(sp_inicio)
 
             sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
                 cta_sp='1521901', anio=self.anio-3)
-            dic_inicio.extend(sp_inicio)
+            if sp_inicio:
+                dic_inicio.extend(sp_inicio)
 
             sp_inicio = self.repo_trancicion_sp.obtener_sp_sami_inicio(
                 cta_sp='1763010', anio=self.anio-3)
-            dic_inicio.extend(sp_inicio)
+            if sp_inicio:
+                dic_inicio.extend(sp_inicio)
 
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1521902')
             dic_final = sp_final
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1259901')
-            dic_final.extend(sp_final)
+            if sp_final:
+                dic_final.extend(sp_final)
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1259902')
-            dic_final.extend(sp_final)
+            if sp_final:
+                dic_final.extend(sp_final)
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1521901')
-            dic_final.extend(sp_final)
+            if sp_final:
+                dic_final.extend(sp_final)
             sp_final = self.repo_trancicion_sp.obtener_sp_sami_final(
                 cta_sp='1763010')
-            dic_final.extend(sp_final)
+            if sp_final:
+                dic_final.extend(sp_final)
 
         df_inicio = pd.DataFrame(dic_inicio)
 
