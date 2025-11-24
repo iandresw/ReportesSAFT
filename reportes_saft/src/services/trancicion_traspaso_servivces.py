@@ -174,6 +174,8 @@ class TrancicionTraspasoService:
             'Valor_act_rur': cat_tec_rural_act['Total'] or 0,
         })
         data_sp = []
+        dic_inicio = []
+        dic_final = []
         if self.sys['TpoCuenta'] == 0:
             cta_sp = {
                 "11111801": "Servicio de Agua Potable",
@@ -199,9 +201,9 @@ class TrancicionTraspasoService:
                 "11111899": "Otros servicios municipales"
             }
 
-            sp_inicio = self.repo_trancicion_sp.obtener_sp_gob_inicio(
+            dic_inicio = self.repo_trancicion_sp.obtener_sp_gob_inicio(
                 cta_sp='111118', anio=self.anio-3)
-            sp_final = self.repo_trancicion_sp.obtener_sp_gob_final(
+            dic_final = self.repo_trancicion_sp.obtener_sp_gob_final(
                 cta_sp='111118',)
 
         else:
