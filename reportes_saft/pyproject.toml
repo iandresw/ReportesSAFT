@@ -16,6 +16,7 @@ dependencies = [
   "qrcode",
   "pandas",
   "openpyxl",
+  "matplotlib",
 ]
 
 [tool.flet]

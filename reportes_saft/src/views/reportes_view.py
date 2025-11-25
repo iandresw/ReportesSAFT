@@ -14,13 +14,14 @@ from services.mora_ip_services import MoraIPService
 from services.mora_ics_sevices import MoraICSService
 from services.mora_sp_services import MoraSPService
 from services.update_services import UpdateService
+from services.mora_aldea_services import MoraAldeaService
 from services.trancicion_traspaso_servivces import TrancicionTraspasoService
 from services.trancicion_traspaso_det_services import TrancicionTraspasoDetalleService
 from reports.trancicion_report import TrancicionReport
 from reports.mora_sp_report import MoraSPReport
 from reports.mora_ics_report import MoraICSReport
 from reports.mora_bi_report import MoraBIReport
-
+from reports.mora_vs_ingresos_aldea_report import MoravsIngresosAldeaReport
 os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
@@ -50,6 +51,9 @@ class VistaReportes:
         self.trancicion_detalle = TrancicionTraspasoDetalleService(
             self.app.conexion_saft, self.datos_system)
 
+        self.mora_aldea = MoraAldeaService(
+            self.app.conexion_saft, self.datos_system)
+
         self.conten_titulo_mora_rpt = container_titulo("REPORTES DE MORA")
         self.conten_titulo_otras_rpt = container_titulo("OTROS REPORTES")
         self.conten_titulo_reportes = container_titulo("Reportes")
@@ -68,6 +72,9 @@ class VistaReportes:
 
         self.btn_mora_sp = create_boton(
             text_label="Mora Servicios Publicos", on_click=self.generar_reporte_mora_sp)
+
+        self.btn_mora_vs_ingresos_general = create_boton(
+            text_label="Mora vs Ingresos por Adea General", on_click=self.abrir_modal_mora_vs_ingresos)
 
         self.btn_trancicon_traspaso = create_boton(
             text_label="Trancición y Traspaso", on_click=self.generar_reporte_trancicicon)
@@ -94,6 +101,7 @@ class VistaReportes:
                 self.btn_mora_ip,
                 self.btn_mora_ics,
                 self.btn_mora_sp,
+                self.btn_mora_vs_ingresos_general
             ],
             expand=True,
             col=12
@@ -153,7 +161,7 @@ class VistaReportes:
 
     def cargar_snack_final(self, nombre_archivo, e):
         e.control.disabled = False
-        e.control.style.bgcolor = color_bg_2()
+        # e.control.style.bgcolor = color_bg_2()
         e.control.update()
         snack_fin = snack_rpt_generado(nombre_archivo)
         self.page.open(snack_fin)
@@ -167,7 +175,7 @@ class VistaReportes:
 
     def cargar_snack_inicio(self, mensaje, e):
         e.control.disabled = True
-        e.control.style.bgcolor = color_bg()
+        # e.control.style.bgcolor = color_bg()
         e.control.update()
         snack_ini = snack_inicio(str(mensaje))
         self.page.open(snack_ini)
@@ -219,6 +227,25 @@ class VistaReportes:
             reporte = MoraICSReport(
                 datos_i, datos_c, datos_s, datos_t, self.datos_muni, "INDUSTRIA, COMERCIO Y SERVICIO")
             reporte.generar_pdf(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_reporte_mora_vs_ingresos_general(self, e):
+        nombre_archivo = "mora_vs_ingresos_gral.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            datos = self.mora_aldea.mora_vs_ingresos_general()
+
+            await asyncio.sleep(0.5)
+            reporte = MoravsIngresosAldeaReport(
+                datos, self.datos_muni, "vs INGRESOS POR ALDEA")
+            reporte.generar_pdf(ruta)
+            ruta_excel = reporte.generar_execel()
+            os.startfile(ruta_excel)
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
             await asyncio.sleep(0.5)
             webbrowser.open_new_tab(f"file://{ruta}")
@@ -333,5 +360,122 @@ class VistaReportes:
             self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
             await asyncio.sleep(0.5)
             os.startfile(ruta)
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    def abrir_modal_mora_vs_ingresos(self, e):
+        # Variable para almacenar la selección
+        self.tipo_impuesto = ft.Ref[ft.RadioGroup]()
+
+        # RadioGroup con los tipos de impuesto
+        radio_group = ft.RadioGroup(
+            ref=self.tipo_impuesto,
+            content=ft.Column([
+                ft.Radio(value="0", label="Otras Tasas"),
+                ft.Radio(value="1", label="Bienes Inmuebles"),
+                ft.Radio(value="4", label="Impuesto Personal"),
+                ft.Radio(value="2,3", label="Industria, Comercio y Servicio"),
+                ft.Radio(value="5", label="Servicios Públicos"),
+                ft.Radio(value="7", label="Planes de Pago"),
+                ft.Radio(value="0,1,2,3,4,5,7", label="Todos (General)")
+            ])
+        )
+
+        # Modal
+        self.dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Seleccione tipo de factura"),
+            content=radio_group,
+            actions=[
+                ft.TextButton(
+                    "PDF", on_click=self.generar_pdf_mora_vs_ingresos),
+                ft.TextButton(
+                    "Excel", on_click=self.generar_excel_mora_vs_ingresos),
+                ft.TextButton("Salir", on_click=lambda _: self.cerrar_modal())
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+
+        self.page.open(self.dialog)
+        self.page.update()
+
+    def cerrar_modal(self):
+        self.dialog.open = False
+        self.page.update()
+
+    async def generar_pdf_mora_vs_ingresos(self, e):
+        impuesto = self.tipo_impuesto.current.value
+        if impuesto == "1":
+            titulo_rpt = "BIENES INMUEBLES"
+        elif impuesto == "2,3":
+            titulo_rpt = "INDUSTRIA COMERCIO Y SERVICIOS"
+        elif impuesto == "4":
+            titulo_rpt = "IMPUESTO PERSONAL"
+        elif impuesto == "5":
+            titulo_rpt = "SERVICIOS PUBLICOS"
+        elif impuesto == "7":
+            titulo_rpt = "PLANES DE PAGO"
+        elif impuesto == "0,1,2,3,4,5,7":
+            titulo_rpt = "TODAS LAS FACTURAS"
+        elif impuesto == "0":
+            titulo_rpt = "OTRAS TASAS E IMPUESTOS"
+        else:
+            titulo_rpt = "DESCONOCIDO, NO-CLASIFICADO"
+        if not impuesto:
+            self.page.open(snack_error("Seleccione un tipo de impuesto"))
+            return
+        self.cerrar_modal()
+        nombre_archivo = "mora_vs_ingresos_gral.pdf"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            datos = self.mora_aldea.mora_vs_ingresos_general(impuesto)
+
+            await asyncio.sleep(0.5)
+            reporte = MoravsIngresosAldeaReport(
+                datos, self.datos_muni, titulo_rpt)
+            reporte.generar_pdf(ruta)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
+            webbrowser.open_new_tab(f"file://{ruta}")
+        except Exception as ex:
+            self.cargar_snack_errr(ex)
+
+    async def generar_excel_mora_vs_ingresos(self, e):
+        impuesto = self.tipo_impuesto.current.value
+        if impuesto == "1":
+            titulo_rpt = "BIENES INMUEBLES"
+        elif impuesto == "2,3":
+            titulo_rpt = "INDUSTRIA COMERCIO Y SERVICIOS"
+        elif impuesto == "4":
+            titulo_rpt = "IMPUESTO PERSONAL"
+        elif impuesto == "5":
+            titulo_rpt = "SERVICIOS PUBLICOS"
+        elif impuesto == "7":
+            titulo_rpt = "PLANES DE PAGO"
+        elif impuesto == "0,1,2,3,4,5,7":
+            titulo_rpt = "TODAS LAS FACTURAS"
+        elif impuesto == "0":
+            titulo_rpt = "OTRAS TASAS E IMPUESTOS"
+        else:
+            titulo_rpt = "DESCONOCIDO, NO-CLASIFICADO"
+
+        if not impuesto:
+            self.page.open(snack_error("Seleccione un tipo de factura"))
+            return
+
+        self.cerrar_modal()
+        nombre_archivo = "mora_vs_ingresos_gral.xlsx"
+        ruta = os.path.join(os.getcwd(), nombre_archivo)
+        try:
+            self.cargar_snack_inicio(f"Iniciando reporte: {nombre_archivo}", e)
+            datos = self.mora_aldea.mora_vs_ingresos_general(impuesto)
+            await asyncio.sleep(0.5)
+            reporte = MoravsIngresosAldeaReport(
+                datos, self.datos_muni, titulo_rpt)
+            ruta_excel = reporte.generar_execel()
+            os.startfile(ruta_excel)
+            self.cargar_snack_final(nombre_archivo=nombre_archivo, e=e)
+            await asyncio.sleep(0.5)
         except Exception as ex:
             self.cargar_snack_errr(ex)
