@@ -6,7 +6,6 @@ def create_boton(text_label="hola", on_click=None, width=200, disabled=None):
     borde_color = color_borde()
     txt_color = color_texto()
     shadow_color = color_shadow()
-
     return ElevatedButton(
         text=text_label,
         disabled=disabled,

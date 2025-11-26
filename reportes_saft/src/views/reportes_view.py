@@ -6,7 +6,9 @@ import asyncio
 from ui.ui_alertas import AlertaGeneral
 from ui.ui_botones import create_boton
 from ui.ui_container import color_bg, color_bg_2, container_titulo, create_container
+from ui.ui_radio import rd_tipo_factura
 from ui.ui_snack_bar import snack_inicio, snack_rpt_generado, snack_error
+from ui.ui_colors import color_texto, color_texto_2, color_texto_parrafo, color_shadow, color_borde
 
 from services.parametro_service import ParametroService
 from services.mora_bi_services import MoraBIService
@@ -364,36 +366,67 @@ class VistaReportes:
             self.cargar_snack_errr(ex)
 
     def abrir_modal_mora_vs_ingresos(self, e):
-        # Variable para almacenar la selección
         self.tipo_impuesto = ft.Ref[ft.RadioGroup]()
+        radio_group = rd_tipo_factura(self.tipo_impuesto)
 
-        # RadioGroup con los tipos de impuesto
-        radio_group = ft.RadioGroup(
-            ref=self.tipo_impuesto,
-            content=ft.Column([
-                ft.Radio(value="0", label="Otras Tasas"),
-                ft.Radio(value="1", label="Bienes Inmuebles"),
-                ft.Radio(value="4", label="Impuesto Personal"),
-                ft.Radio(value="2,3", label="Industria, Comercio y Servicio"),
-                ft.Radio(value="5", label="Servicios Públicos"),
-                ft.Radio(value="7", label="Planes de Pago"),
-                ft.Radio(value="0,1,2,3,4,5,7", label="Todos (General)")
-            ])
-        )
-
-        # Modal
         self.dialog = ft.AlertDialog(
             modal=True,
-            title=ft.Text("Seleccione tipo de factura"),
-            content=radio_group,
+            bgcolor=color_bg(),
+            title=ft.Text("Generar Mora vs Ingresos",
+                          color=color_texto(), size=15, font_family="Tahoma", text_align=ft.TextAlign.CENTER),
+            content=ft.Column(
+                controls=[
+                    ft.Text("Seleccione tipo de impuesto:",
+                            color=color_texto(), size=10, font_family="Tahoma", text_align=ft.TextAlign.CENTER),
+                    radio_group,
+                ],
+                tight=True,
+                scroll=ft.ScrollMode.AUTO,
+                col=12,
+                alignment=ft.MainAxisAlignment.CENTER,         # centra verticalmente
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centra horizontalmente
+                expand=True
+            ),
+
             actions=[
-                ft.TextButton(
-                    "PDF", on_click=self.generar_pdf_mora_vs_ingresos),
-                ft.TextButton(
-                    "Excel", on_click=self.generar_excel_mora_vs_ingresos),
-                ft.TextButton("Salir", on_click=lambda _: self.cerrar_modal())
+                ft.ElevatedButton("PDF", icon=ft.Icons.PICTURE_AS_PDF_OUTLINED,
+                                  on_click=self.generar_pdf_mora_vs_ingresos, color=color_borde(),
+
+                                  style=ft.ButtonStyle(
+                                      side=ft.BorderSide(2, color_borde()),
+                                      shape=ft.RoundedRectangleBorder(
+                                          radius=18),
+                                      bgcolor=color_bg_2(),
+                                      shadow_color=color_shadow(),
+                                      text_style=ft.TextStyle(
+                                          size=11, font_family="Tahoma", color=color_borde()),
+                                  )),
+                ft.ElevatedButton("Excel", icon=ft.Icons.BACKUP_TABLE_ROUNDED,
+                                  on_click=self.generar_excel_mora_vs_ingresos, color=color_borde(),
+
+                                  style=ft.ButtonStyle(
+                                      side=ft.BorderSide(2, color_borde()),
+                                      shape=ft.RoundedRectangleBorder(
+                                          radius=18),
+                                      bgcolor=color_bg_2(),
+                                      shadow_color=color_shadow(),
+                                      text_style=ft.TextStyle(
+                                          size=11, font_family="Tahoma", color=color_borde()),
+                                  )),
+                ft.ElevatedButton("Salir", icon=ft.Icons.EXIT_TO_APP, color=color_borde(),
+
+                                  style=ft.ButtonStyle(
+                                      side=ft.BorderSide(2, color_borde()),
+                                      shape=ft.RoundedRectangleBorder(
+                                          radius=18),
+                                      bgcolor=color_bg_2(),
+                                      shadow_color=color_shadow(),
+                                      text_style=ft.TextStyle(
+                                          size=11, font_family="Tahoma", color=color_borde()),
+                ),
+                    on_click=lambda _: self.cerrar_modal())
             ],
-            actions_alignment=ft.MainAxisAlignment.END,
+            actions_alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
 
         self.page.open(self.dialog)

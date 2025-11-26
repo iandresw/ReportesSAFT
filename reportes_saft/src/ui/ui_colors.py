@@ -3,6 +3,7 @@ from flet import Colors
 
 def color_borde():
     return "#E5C07B"
+    # return "#E5C07B"
 
 
 def color_texto():

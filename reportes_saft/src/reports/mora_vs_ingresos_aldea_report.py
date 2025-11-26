@@ -1,22 +1,27 @@
+from decimal import Decimal
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
+from openpyxl.utils import get_column_letter
 from datetime import datetime
 import matplotlib.pyplot as plt
 from openpyxl import Workbook
-from openpyxl.chart import BarChart, Reference
+from openpyxl.chart import BarChart, Reference, series
+from openpyxl.chart.shapes import GraphicalProperties
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.drawing.image import Image as Img
-
+import pandas as pd
 from ui.ui_style_table import columa_style
 
 
 class MoravsIngresosAldeaReport:
-    def __init__(self, datos, municipio, titulo_reporte):
+    def __init__(self, datos: pd.DataFrame, municipio, titulo_reporte):
         self.datos = datos
         self.municipio = municipio
         self.titulo = titulo_reporte
+        self.datos["Clasificacion"] = self.datos["PorcentajeMora"].apply(
+            self.clasificar_mora)
 
     def generar_pdf(self, ruta_salida="mora_vs_ingresos_gral.pdf"):
         doc = SimpleDocTemplate(ruta_salida, pagesize=landscape(letter))
@@ -139,10 +144,13 @@ class MoravsIngresosAldeaReport:
                 ]
             )
         )
+        texto = Paragraph(
+            "Nota aclaratoria: La información de mora, ingresos y generación tributaria presentada en este reporte se basa exclusivamente en la facturación disponible en el sistema SAFT al momento de su elaboración. La ausencia de facturación actualizada o completa puede generar discrepancias en los valores mostrados, en especial en los impuestos de Bienes Inmuebles, donde puede realizar la carga masiva de facturas de las propiedades debidamente registradas.", estilos["Normal"])
         elementos.append(Image("grafico_mora.png", width=500, height=300))
         elementos.append(tabla)
         elementos.append(Spacer(1, 20))
-
+        elementos.append(texto)
+        elementos.append(Spacer(1, 20))
         footer = Paragraph(
             "<b>Generado por el sistema SAFT</b>",
             estilos["Normal"],
@@ -177,8 +185,8 @@ class MoravsIngresosAldeaReport:
         # ===============================
         # ⭐ TITULO Y FECHA
         # ===============================
-        titulo = f"REPORTE DE MORA - {self.municipio['NombreMuni']} ({self.municipio['NombreDepto']})"
-        titulo_rpt = self.titulo
+        titulo = f"{self.municipio['NombreMuni']} - {self.municipio['NombreDepto']}"
+        titulo_rpt = f"REPORTE DE MORA - {self.titulo}"
         fecha = f"Fecha de elaboración: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
 
         ws.merge_cells("A1:J1")
@@ -186,12 +194,12 @@ class MoravsIngresosAldeaReport:
         ws["A1"].alignment = align_center
         ws["A1"].font = title_font
 
-        ws.merge_cells("A1:J1")
+        ws.merge_cells("A2:J2")
         ws["A2"] = titulo_rpt
         ws["A2"].alignment = align_center
         ws["A2"].font = title_font
 
-        ws.merge_cells("A2:J2")
+        ws.merge_cells("A3:J3")
         ws["A3"] = fecha
         ws["A3"].alignment = align_center
         ws["A3"].font = date_font
@@ -230,6 +238,7 @@ class MoravsIngresosAldeaReport:
 
         aldeas_graf = []
         porcentajes_graf = []
+        datos_grafico = []
 
         for index, item in self.datos.iterrows():
 
@@ -243,21 +252,24 @@ class MoravsIngresosAldeaReport:
             porcentaje_mora = item["PorcentajeMora"] or 0
 
             ws.append([
-                item["CodAldea"],
+                item["CodAldea"].strip(),
                 item["NombreAldea"].strip(),
                 facturas,
                 totalGen,
                 fact_pagadas,
-                ingresos,
+                round(ingresos, 2),
                 fact_mora,
-                mora,
-                porcentaje_ing / 100,
-                porcentaje_mora / 100
+                round(mora, 2),
+                round(porcentaje_ing / 100, 2),
+                round(porcentaje_mora / 100, 2),
             ])
 
             # Datos del gráfico
             aldeas_graf.append(item["NombreAldea"].strip())
             porcentajes_graf.append(porcentaje_mora)
+
+            datos_grafico.append(
+                (item["NombreAldea"].strip(), porcentaje_mora))
 
             # Sumatorias
             total_facturas += facturas
@@ -283,21 +295,24 @@ class MoravsIngresosAldeaReport:
             total_facturas,
             total_generado,
             total_facturas_pagadas,
-            total_ingresos,
+            round(total_ingresos, 2),
             total_facturas_mora,
-            total_mora,
-            porcentaje_total_ing / 100,
-            porcentaje_total_mora / 100
+            round(total_mora, 2),
+            round(porcentaje_total_ing / 100, 2),
+            round(porcentaje_total_mora / 100, 2),
         ])
 
         # ===============================
         # ⭐ FORMATO DE CELDAS Y MONEDA
         # ===============================
         ultima_fila = ws.max_row
+        fila = 5
 
         for row in ws.iter_rows(min_row=5, max_row=ultima_fila, max_col=10):
             for cell in row:
                 cell.border = border
+                fila += 1
+                porcentaje = ws.cell(row=fila, column=10).value
 
                 if cell.column_letter in ["C"]:  # Total facturas
                     cell.alignment = align_right
@@ -314,28 +329,103 @@ class MoravsIngresosAldeaReport:
 
                 if cell.column_letter in ["A", "B"]:
                     cell.alignment = align_left
+        for row in range(6, ultima_fila + 1):
+            cell = ws[f"J{row}"]          # Celda actual en columna J
+            # Valor numérico (entre 0 y 1 si es %)
+            porcentaje = cell.value
 
+            if porcentaje is None:
+                continue
+
+            # Si el porcentaje está en formato porcentaje (0.25 = 25%)
+            porcentaje_real = porcentaje * 100
+
+            # Mapa de calor
+            if porcentaje_real >= 91:
+                color = "FF0000"  # ROJO fuerte (Crítica)
+            elif porcentaje_real >= 70:
+                color = "FF7F7F"  # Rojo suave (Muy alta)
+            elif porcentaje_real >= 40:
+                color = "FFC000"  # Naranja (Alta)
+            elif porcentaje_real >= 20:
+                color = "FFFF00"  # Amarillo (Media)
+            elif porcentaje_real >= 10:
+                color = "92D050"  # Verde suave (Baja)
+            else:
+                color = "00B050"  # Verde fuerte (Excelente)
+
+            # Aplicar color
+            cell.fill = PatternFill(
+                start_color=color, end_color=color, fill_type="solid")
         # ===============================
         # ⭐ AJUSTE AUTOMÁTICO DE COLUMNAS
         # ===============================
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column  # número de columna
+            column_letter = get_column_letter(column)
 
+            for cell in col[5:]:
+                try:
+                    if cell.value:
+                        length = len(str(cell.value))
+                        if length > max_length:
+                            max_length = length
+                except:
+                    pass
+            adjusted_width = max_length + 2  # un pequeño margen
+            ws.column_dimensions[column_letter].width = adjusted_width
         # ===============================
         # ⭐ GRÁFICO INCRUSTADO
         # ===============================
-        plt.figure(figsize=(12, 5))
-        plt.bar(aldeas_graf, porcentajes_graf)
-        plt.xticks(rotation=90)
-        plt.title("Porcentaje de mora por aldea")
-        plt.tight_layout()
-        plt.savefig("grafico_excel.png")
-        plt.close()
+        # plt.figure(figsize=(12, 5))
+        # plt.bar(aldeas_graf, porcentajes_graf)
+        # plt.xticks(rotation=90)
+        # plt.title("Porcentaje de mora por aldea")
+        # plt.tight_layout()
+        # plt.savefig("grafico_excel.png")
+        # plt.close()
 
-        img = Img("grafico_excel.png")
-        img.anchor = "L2"
-        ws.add_image(img)
+        # img = Img("grafico_excel.png")
+        # img.anchor = "L2"
+        # ws.add_image(img)
+
+        chart = BarChart()
+        chart.type = "col"
+        chart.title = "Porcentaje de Mora por Aldea"
+        chart.y_axis.title = "Porcentaje (%)"
+        chart.x_axis.title = "Aldeas"
+
+        data = Reference(ws, min_col=10, min_row=6,
+                         max_row=len(datos_grafico)+1)
+        categorias = Reference(ws, min_col=2, min_row=6,
+                               max_row=len(datos_grafico)+1)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(categorias)
+
+
+# Insertar gráfico en hoja
+        # Insertar gráfico en Excel
+        ws.add_chart(chart, "L28")
 
         # ===============================
         # ⭐ GUARDAR
         # ===============================
         wb.save(ruta_salida)
         return ruta_salida
+
+    def clasificar_mora(self, porcentaje):
+        if porcentaje:
+            if porcentaje >= 91:
+                return "Crítica"
+            elif porcentaje >= 70:
+                return "Muy Alta"
+            elif porcentaje >= 40:
+                return "Alta"
+            elif porcentaje >= 20:
+                return "Media"
+            elif porcentaje >= 10:
+                return "Baja"
+            else:
+                return "Excelente"
+        return "No Calculado"

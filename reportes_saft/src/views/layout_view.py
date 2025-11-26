@@ -24,13 +24,13 @@ class UILayout(ft.Container):
         self.page = page
         self.x_width = 900
         self.x_height = 710
-        self.page.window.width = 900
-        self.page.window.height = 90
-        self.page.window.center()
-        self.page.window.max_height = 1080
-        self.page.window.min_height = 1
-        self.page.window.max_width = 1080
-        self.page.window.min_width = 1
+        # self.page.window.width = 900
+        # self.page.window.height = 90
+        # self.page.window.center()
+        self.page.window.max_height = 1000000
+        self.page.window.min_height = 800
+        self.page.window.max_width = 10000
+        self.page.window.min_width = 1024
         self.page.window.maximizable = True
         self.page.window.minimizable = True
         self.page.window.resizable = True
@@ -138,11 +138,6 @@ class UILayout(ft.Container):
     def build(self):  # type: ignore
         # self.page.title = "Reportes SAFT"  # type: ignore
 
-        # self.page.window.max_height = 1024
-        # self.page.window.min_height = 1
-        # self.page.window.max_width = 1024
-        # self.page.window.min_width = 1
-        # self.page.update()
         return ft.Column(
             [
                 ft.Row([self.titulo_muni]),
