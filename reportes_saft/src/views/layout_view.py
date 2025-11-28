@@ -5,10 +5,10 @@ from contexts.app_context import AppContext
 from views.permiso_operacion_view import VistaPermisoOperacion
 from ui.ui_container import create_container_rail
 from views.about_view import VistaAbout
-from views.reportes_view import VistaReportes
+# from views.reportes_view import VistaReportes
 from ui.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
 from services.parametro_service import ParametroService
-
+from ui.reports.vista_reportes import VistaReportes
 os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
@@ -49,6 +49,7 @@ class UILayout(ft.Container):
         parametro_service = ParametroService(self.context.conexion_saft)
         datos_muni = parametro_service.obtener_datos_municipalidad()
         datos_system = parametro_service.obtener_datos_systema()
+        self.user = self.context.usuario_actual
 
         municipalidad = datos_muni['NombreMuni'].rstrip().replace(
             "Municipalidad de", "")
@@ -61,6 +62,35 @@ class UILayout(ft.Container):
             text_align=ft.TextAlign.CENTER,
             color=text_color
         )
+        user = self.user.username
+        self.user_info = ft.PopupMenuButton(
+            items=[
+                ft.PopupMenuItem(
+                    content=ft.Text("Cerrar sesión",
+                                    color=color_texto()),
+                    on_click=lambda e: self.cerrar_sesion(), height=20),
+            ],
+            content=ft.Row(
+                [
+                    ft.CircleAvatar(
+                        content=ft.Image(src='/avatar.png',
+                                         width=40, height=40),
+                        radius=16,
+                        bgcolor="#4A90E2",
+                    ),
+                    ft.Text(
+                        user,
+                        color=color_texto(),
+                        size=14,
+                        weight=ft.FontWeight.BOLD
+                    )
+                ],
+                spacing=8,
+                alignment=ft.MainAxisAlignment.END,
+
+            ),
+            menu_position=ft.PopupMenuPosition.UNDER,
+            bgcolor=color_bg_2())
 
     # --- Crear las vistas ---
         view_reportes = VistaReportes(self.page, self.context).build()
@@ -70,7 +100,7 @@ class UILayout(ft.Container):
 
         # --- Contenedor dinámico donde se cargan las vistas ---
         self.main_content = ft.Container(
-            expand=True,
+            expand=1,
             content=view_reportes  # vista inicial
         )
 
@@ -140,7 +170,8 @@ class UILayout(ft.Container):
 
         return ft.Column(
             [
-                ft.Row([self.titulo_muni]),
+                ft.Row([self.titulo_muni, self.user_info],
+                       alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Row(
                     [
                         self.con_rail,
@@ -152,3 +183,8 @@ class UILayout(ft.Container):
             ],
             expand=True,
         )
+
+    def cerrar_sesion(self):
+        self.page.window.close()
+        self.page.window.destroy()  # Cierra la ventana completa
+        os._exit(0)

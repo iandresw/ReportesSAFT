@@ -1,4 +1,4 @@
-from flet import Radio, TextStyle, RadioGroup, Column, ScrollMode, MainAxisAlignment, CrossAxisAlignment
+from flet import Radio, TextStyle, RadioGroup, Column, ScrollMode, MainAxisAlignment, CrossAxisAlignment, Row
 from ui.ui_colors import color_check, color_texto
 
 
@@ -25,4 +25,15 @@ def rd_tipo_factura(tipo_impuesto):
             create_radio(value="7", label_text="Planes de Pago"),
             create_radio(value="0,1,2,3,4,5,7", label_text="Todos (General)")
         ],)
+    )
+
+
+def rd_ubicacion(ubicacion):
+    return RadioGroup(
+        ref=ubicacion,
+        value="0",
+        content=Row([
+            create_radio(value="0", label_text="Urbano"),
+            create_radio(value="1", label_text="Rural"),
+        ], alignment=MainAxisAlignment.SPACE_AROUND)
     )

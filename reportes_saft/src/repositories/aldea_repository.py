@@ -12,3 +12,20 @@ class AldeaRepository:
 
             columns = [column[0] for column in cur.description]
             return dict(zip(columns, row))
+
+    def obtener_aldeas(self):
+        query = "SELECT CodAldea, NombreAldea, UbicacionAldea FROM Aldea"
+
+        with self.conexion.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            if not rows:
+                return []
+
+            columns = [column[0] for column in cur.description]
+
+            # Convertir cada fila en un diccionario
+            aldeas = [dict(zip(columns, row)) for row in rows]
+
+            return aldeas

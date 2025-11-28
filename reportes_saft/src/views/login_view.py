@@ -70,7 +70,7 @@ class PantallaLogin:
                 left=20, top=10, right=0, bottom=0)),
             ft.Container(self.pass_input, padding=ft.Padding(
                 left=20, top=10, right=0, bottom=0)),
-            ft.Container(self.checkbox, alignment=ft.Alignment(
+            ft.Container(ft.Row(controls=[self.checkbox], alignment=ft.MainAxisAlignment.CENTER), alignment=ft.Alignment(
                 0, 0), padding=ft.Padding(left=0, top=0, right=0, bottom=0)),
             ft.Container(ft.ElevatedButton(content=ft.Text('INICIAR', color='white',
                          weight=ft.FontWeight.W_500), width=280, bgcolor='black', on_click=self.login_clicked,), ),

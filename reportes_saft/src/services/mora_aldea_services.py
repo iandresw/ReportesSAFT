@@ -24,3 +24,19 @@ class MoraAldeaService:
             raise ValueError(
                 "No se encontraron datos de mora general de aldeas  (DataFrame vacío).")
         return df
+
+    def mora_bi_ubicacion(self, cod_aldea, ubicacion):
+        data_res = self.repo_mora.mora_bi_ubicacion(
+            cod_aldea=cod_aldea, ubicacion=ubicacion)
+
+        if not data_res:
+            raise ValueError(
+                "No se encontraron datos de mora de bienes inmuebles por aldea y año (respuesta vacía).")
+        try:
+            df = pd.DataFrame(data_res)
+        except Exception as e:
+            raise ValueError(f"No se pudo convertir a DataFrame: {e}")
+        if df.empty:
+            raise ValueError(
+                "No se encontraron datos de mora de bienes inmuebles por aldea y año  (DataFrame vacío).")
+        return df

@@ -9,7 +9,7 @@ def createCheckBox(label_text="", on_change=None):
         label=label_text,
         value=False,
         disabled=False,
-        col=6,
+        col=12,
         visible=True,
         label_style=TextStyle(
             size=10, font_family="Tahoma", color=color_texto()),

@@ -80,7 +80,7 @@ def container_titulo(label_text="Titulo Container", label_size=11):
         bgcolor=color_bg(),
         alignment=alignment.center,
         border_radius=10,
-        expand=True,
+        # expand=True,
         padding=5,
         height=30,
         #     border=Border(

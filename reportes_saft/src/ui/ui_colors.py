@@ -52,3 +52,7 @@ def color_bg_snack():
 
 def color_bg_snack_error():
     return '#E06C75'
+
+
+def color_icon_loguin():
+    return '#616B73'
