@@ -30,7 +30,7 @@ async def ejecutar_reporte(
     e,
     nombre_archivo,
     obtener_datos,
-    construir_reporte,
+    construir_reporte=None,
     tipo="pdf",
 ):
     ruta = os.path.join(os.getcwd(), nombre_archivo)

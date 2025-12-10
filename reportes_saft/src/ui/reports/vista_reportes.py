@@ -5,7 +5,7 @@ import datetime
 from ui.reports.layout_reportes import build_layout
 from ui.reports.botones_reportes import botones_mora, botones_otros
 from ui.ui_container import container_titulo, create_container
-from ui.reports.eventos_reportes import (generar_analisis_ingresos, generar_mora_bi, generar_mora_bi_aldea_anio_excel, generar_mora_bi_aldea_anio_pdf, generar_mora_ics, generar_mora_ip,
+from ui.reports.eventos_reportes import (anula_plan_pago, generar_analisis_ingresos, generar_mora_bi, generar_mora_bi_aldea_anio_excel, generar_mora_bi_aldea_anio_pdf, generar_mora_ics, generar_mora_ip,
                                          generar_mora_sp, generar_pdf_mora_vs_ingresos, generar_excel_mora_vs_ingresos, generar_reporte_trancicicon,
                                          generar_reporte_trancicicon_det_amb, generar_reporte_trancicicon_det_bi,
                                          generar_reporte_trancicicon_det_ics, generar_reporte_trancicicon_det_ip,
@@ -13,6 +13,7 @@ from ui.reports.eventos_reportes import (generar_analisis_ingresos, generar_mora
 from ui.modals.mora_aldea_bi_modal import abrir_modal_mora_bi_aldea_anio
 from ui.modals.mora_vs_ingresos_aldea_modal import abrir_modal_mora_vs_ingresos
 from ui.modals.analisi_ingresos_modal import abrir_analisis_ingresos
+from ui.modals.anula_pp_modal import abrir_anula_plan_pago
 from services.aldea_servives import AldeaService
 from services.parametro_service import ParametroService
 from services.mora_bi_services import MoraBIService
@@ -20,6 +21,7 @@ from services.mora_ip_services import MoraIPService
 from services.mora_ics_sevices import MoraICSService
 from services.mora_sp_services import MoraSPService
 from services.update_services import UpdateService
+from services.plan_pago_services import PlanesPagoService
 from services.mora_aldea_services import MoraAldeaService
 from services.trancicion_traspaso_servivces import TrancicionTraspasoService
 from services.trancicion_traspaso_det_services import TrancicionTraspasoDetalleService
@@ -73,8 +75,10 @@ class VistaReportes:
             self.app.conexion_saft, self.datos_system)
         self.analisis = AnalisisIngresosService(
             self.app.conexion_saft, self.datos_system)
+        self.plan_pago = PlanesPagoService(self.app.conexion_saft)
 
     # BOTONES DE TRANCISION
+
     def rept_trancicicon(self, e):
         asyncio.run(generar_reporte_trancicicon(self, e))
 
@@ -129,6 +133,12 @@ class VistaReportes:
         self.dialog = abrir_analisis_ingresos(self, e)
         self.page.open(self.dialog)
         self.page.update()
+
+    def abril_modal_anula_pp(self, e):
+        self.identidad = ''
+        self.dialog = abrir_anula_plan_pago(self, e)
+        self.page.open(self.dialog)
+        self.page.update()
     # CERRAR MODALS
 
     def cerrar_modal(self):
@@ -149,3 +159,6 @@ class VistaReportes:
 
     def generar_exel_analisi_ingresos(self, e):
         asyncio.run(generar_analisis_ingresos(self, e))
+
+    def anular_plan_pago(self, e):
+        asyncio.run(anula_plan_pago(self, e))

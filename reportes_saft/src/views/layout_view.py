@@ -2,6 +2,7 @@ import flet as ft
 import logging
 import os
 from contexts.app_context import AppContext
+from ui.dashboard.vista_dashboard import VistaDashBoard
 from views.permiso_operacion_view import VistaPermisoOperacion
 from ui.ui_container import create_container_rail
 from views.about_view import VistaAbout
@@ -97,6 +98,7 @@ class UILayout(ft.Container):
         view_about = VistaAbout(self.page, self.context).build()
         view_permiso_operacion = VistaPermisoOperacion(
             self.page, self.context).build()
+        # view_dashboard = VistaDashBoard(self.page, self.context).build()
 
         # --- Contenedor dinámico donde se cargan las vistas ---
         self.main_content = ft.Container(
@@ -110,8 +112,10 @@ class UILayout(ft.Container):
             if index == 0:
                 self.main_content.content = view_reportes
             elif index == 1:
-                self.main_content.content = view_permiso_operacion
+                self.main_content.content = view_reportes
             elif index == 2:
+                self.main_content.content = view_permiso_operacion
+            elif index == 3:
                 self.main_content.content = view_about
             self.page.update()  # type: ignore
 
@@ -127,6 +131,15 @@ class UILayout(ft.Container):
             leading=ft.Image(src="/saft.png", width=50),
             group_alignment=-0.9,
             destinations=[
+                ft.NavigationRailDestination(
+                    icon=ft.Icon(ft.Icons.SPACE_DASHBOARD_OUTLINED,
+                                 color=text_color, size=20),
+                    selected_icon=ft.Icon(
+                        ft.Icons.SPACE_DASHBOARD_ROUNDED, color=text_color, size=20),
+                    label_content=ft.Text(
+                        "Dashbord",  color=text_color, size=11, text_align=ft.TextAlign.CENTER),
+                    indicator_color=shadow_color,
+                ),
                 ft.NavigationRailDestination(
                     icon=ft.Icon(ft.Icons.VIEW_COMFORTABLE_OUTLINED,
                                  color=text_color, size=20),

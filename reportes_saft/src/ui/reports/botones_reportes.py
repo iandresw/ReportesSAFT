@@ -19,12 +19,12 @@ def botones_mora(vista):
 
 def botones_otros(vista):
     return [
-        create_boton("Transición y Traspaso",
-                     vista.rept_trancicicon),
+        create_boton("Transición y Traspaso", vista.rept_trancicicon),
         create_boton("Detalle IP", vista.rpt_trancicion_det_ip),
         create_boton("Detalle BI", vista.rpt_trancicion_det_bi),
         create_boton("Detalle ICS", vista.rpt_trancicion_det_ics),
         create_boton("Detalle AMB", vista.rpt_trancicion_det_amp),
         create_boton("Detalle IST", vista.rpt_trancicion_det_ist),
         create_boton("Detalle SP", vista.rpt_trancicion_det_sp),
+        # create_boton("Anula Plan de Pago", vista.abril_modal_anula_pp),
     ]

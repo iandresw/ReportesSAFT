@@ -1,0 +1,13 @@
+{
+    "horario1Ape":"04:00",
+    "horario1Cie":"10:00",
+    "horario2Ape":"08:00",
+    "horario2Cie":"10:00",
+    "horario3Ape":"09:00",
+    "horario3Cie":"10:00",
+    "dia1Ini":"DOMINGO",
+    "dia1Fin":"JUEVES",
+    "dia2Ini":"VIERNES",
+    "dia2Fin":"SABADO",
+    "diaFestivo":"DIAS FESTIVOS"
+}

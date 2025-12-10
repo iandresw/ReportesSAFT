@@ -98,3 +98,22 @@ class PermisoOperacionReposirory:
                 return True
         except Exception as e:
             return False
+
+    def insertar_horario_alcohol(self, horario):
+        query = """INSERT INTO Tra_PerOpeHoraAlch (codPerOpe, horaApeDomJue, horaCieDomJue, horaApeVierSab, horaCieVierSab, horaApeFestivo, horaCieFestivo) 
+        VALUES (?, ?, ?, ?, ?, ?, ?) """
+        try:
+            with self.conexion.cursor() as cur:
+                cur.execute(query, horario)
+                return True
+        except Exception as e:
+            return False
+
+    def get_horario_alcohol(self, cod_permiso):
+        query = """SELECT  codPerOpe, horaApeDomJue, horaCieDomJue, horaApeVierSab, horaCieVierSab, horaApeFestivo, horaCieFestivo FROM Tra_PerOpeHoraAlch WHERE codPerOpe = ?   """
+        try:
+            with self.conexion.cursor() as cur:
+                cur.execute(query, (cod_permiso,))
+                return True
+        except Exception as e:
+            return False

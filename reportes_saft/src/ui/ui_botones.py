@@ -67,3 +67,33 @@ def create_boton_salir_modal() -> ElevatedButton:
             size=11, font_family="Tahoma", color=color_borde()),
     ),
     )
+
+
+def create_boton_aceptar() -> ElevatedButton:
+    return ElevatedButton("Aceptar", icon=Icons.CACHED, color=color_borde(),
+                          width=80,
+                          style=ButtonStyle(
+        side=BorderSide(2, color_borde()),
+        shape=RoundedRectangleBorder(
+            radius=18),
+        bgcolor=color_bg_2(),
+        shadow_color=color_shadow(),
+        text_style=TextStyle(
+            size=11, font_family="Tahoma", color=color_borde()),
+    ),
+    )
+
+
+def create_boton_guardar_modal() -> ElevatedButton:
+    return ElevatedButton("Guardar", icon=Icons.SAVE_AS_OUTLINED, color=color_borde(),
+                          width=90,
+                          style=ButtonStyle(
+        side=BorderSide(2, color_borde()),
+        shape=RoundedRectangleBorder(
+            radius=18),
+        bgcolor=color_bg_2(),
+        shadow_color=color_shadow(),
+        text_style=TextStyle(
+            size=11, font_family="Tahoma", color=color_borde()),
+    ),
+    )

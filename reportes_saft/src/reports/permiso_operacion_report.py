@@ -14,8 +14,15 @@ import json
 import qrcode
 from io import BytesIO
 
+for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
+    try:
+        locale.setlocale(locale.LC_TIME, loc)
+        print("Locale aplicado:", loc)
+        break
+    except locale.Error:
+        pass
 
-locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
+
 # ==== Registrar fuentes Malgun desde carpeta local ====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # sube un nivel desde reports/

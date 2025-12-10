@@ -190,6 +190,40 @@ def estilos_parrafo():
         spaceBefore=0,
         spaceAfter=5
     ))
+    estilos.add(ParagraphStyle(
+        name='la_esperanza_firma_alc',
+        fontSize=9,
+        textColor=colors.white,
+        fontName="Arial-Rounded-MT-Bold",
+        leading=0,
+        alignment=1,  # justificado
+        spaceBefore=0,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='horario',
+        fontSize=6,
+        textColor=colors.red,
+        fontName="Times-Roman",
+        leading=0,
+        alignment=0,  # justificado
+        spaceBefore=5,
+        spaceAfter=5
+    ))
+    estilos.add(ParagraphStyle(
+        name='horario_title',
+        fontSize=6,
+        underlineColor=colors.red,
+        underlineWidth=0.5,
+        underlineGap=0.5,
+        textColor=colors.red,
+        underline=True,
+        fontName="Times-Roman",
+        leading=0,
+        alignment=0,  # justificado
+        spaceBefore=0,
+        spaceAfter=0
+    ))
 
     estilos.add(ParagraphStyle(
         name='concepcion_telefono',
@@ -199,7 +233,7 @@ def estilos_parrafo():
         leading=13,
         alignment=1,  # centradp
         spaceBefore=5,
-        spaceAfter=5
+        spaceAfter=25
     ))
     estilos.add(ParagraphStyle(
         name='concepcion_title_ope',

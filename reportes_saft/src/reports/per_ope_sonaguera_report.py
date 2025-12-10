@@ -26,7 +26,7 @@ for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
         pass
 
 
-class PerOpeConcepcionReport:
+class PerOpeSonagueraReport:
     def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False):
         self.datos = datos
         self.municipio = municipio
@@ -64,7 +64,7 @@ class PerOpeConcepcionReport:
 
         canvas.restoreState()
 
-    def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
+    def generar_pdf(self, ruta_salida="po_report.pdf"):
         doc = SimpleDocTemplate(ruta_salida, pagesize=landscape(letter),
                                 leftMargin=self.margen,
                                 rightMargin=self.margen,
@@ -88,11 +88,11 @@ class PerOpeConcepcionReport:
 
         municipalidad = Paragraph(
             f"{self.muni_admin["NombreEmpresa"].upper()}", estilos["concepcion_title"],)
-        email = Paragraph(
-            f"E-Mail: {self.municipio["Email"].lower()}, Tel.{self.municipio["Telefono"]}", estilos["concepcion_telefono"],)
 
         titulo_po = Paragraph(
-            f"PERMISO DE APERTURA Y OPERACIÓN DEL NEGOCIO", estilos["concepcion_title_ope"],)
+            f"PERMISO DE OPERACIÓN DE INDUSTRIA Y COMERCIO", estilos["concepcion_title_ope"],)
+        sub_titulo_po = Paragraph(
+            f"AUTORIZADO CONFORME AL DECRETO:", estilos["concepcion_title_ope"],)
         fila_titulo_per = [titulo_po]
         tabla_titulo_po = Table([fila_titulo_per], colWidths=[700])
         estilo = TableStyle([
@@ -107,7 +107,9 @@ class PerOpeConcepcionReport:
         tabla_titulo_po.setStyle(estilo)
 
         texto1 = Paragraph(
-            f"POR ESTE MEDIO SE HACE CONSTAR QUE: EL PROPIETARIO DEL ESTABLECIMIENTO A CONTINUACIÓN DETALLADO, ESTA AUTORIZADO PARA OPERAR EL SIGUIENTE NEGOCIO.", estilos["concepcion_parrafo"])
+            f"CONFORME AL PLAN DE ÁRBITROS AL ARTÍCULO N. 13 INCISO 9 Y 10 DE LA LEY DE MUNICIPALIDADES VIGENTE.  EL SUSCRITO ALCALDE MUNICIPAL DE SONAGUERA DEPARTAMENTO DE COLON, CONCEDE EL PRESENTE PERMISO DE OPERACIÓN EL CUAL DEBERÁ SER COLOCADO EN UN SITIO VISIBLE.", estilos["concepcion_parrafo"])
+        texto2 = Paragraph(
+            f"NOTA: AL MOMENTO DE CERRAR OPERACIONES NOTIFICARLO INMEDIATAMENTE AL DEPARTAMENTO DE CONTROL TRIBUTARIO.", estilos["concepcion_parrafo"])
 
         fila_texto1 = [
             texto1
@@ -118,42 +120,32 @@ class PerOpeConcepcionReport:
 
 # TABLA PROPIETARIO
         fila_propitario = [
-            Paragraph(f"Nombre del propietario o Rep. Legal:",
+            Paragraph(f"PROPIETARIO:",
                       estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Propietario}",
                       estilos["concepcion_campos"]),
         ]
         fila_dni = [
-            Paragraph(f"ID Nº: ", estilos["concepcion_campos"],),
+            Paragraph(f"No. IDENTIDAD:", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.idrepresentante}",
                       estilos["concepcion_campos"]),
         ]
         fila_negocio = [
-            Paragraph(f"Nombre Empresa:", estilos["concepcion_campos"],),
+            Paragraph(f"NOMBRE DEL NEGOCIO:", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Negocio}", estilos["concepcion_campos"],),
         ]
         fila_ubicacion = [
-            Paragraph(f"Ubicacion:", estilos["concepcion_campos"],),
+            Paragraph(f"DIRECCION:", estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Direccion}",
                       estilos["concepcion_campos"],),
         ]
         fila_actividad = [
-            Paragraph(f"Tipo de Actividad:", estilos["concepcion_campos"],),
+            Paragraph(f"ACTIVIDAD PRINCIPAL DEL NEGOCIO:",
+                      estilos["concepcion_campos"],),
             Paragraph(f"{self.datos.Actividad}",
                       estilos["concepcion_campos"],),
         ]
-        fila_fecha_vence = [
-            Paragraph(f"Fecha Vencimiento:", estilos["concepcion_campos"],),
-            Paragraph(f"31 de Diciembre del año {self.datos.Periodo}",
-                      estilos["concepcion_campos"],),
-        ]
-        fila_no_recibo = [
-            Paragraph(f"Serie de recibo de pago No.:",
-                      estilos["concepcion_campos"],),
-            Paragraph(f"{self.datos.NumRecibo}",
-                      estilos["concepcion_campos"],),
-        ]
-        lugar_fecha = ""
+
         fila_lugar_fecha = [Paragraph(f"{self.municipio["NombreMuni"].capitalize()}, {self.municipio["NombreDepto"].capitalize()} a los {dia} dias del mes de {mes} del {anio}", estilos["concepcion_campos"]),
 
                             ""]
@@ -163,7 +155,7 @@ class PerOpeConcepcionReport:
 
         tabla_datos = Table(
             [fila_propitario, fila_dni, fila_negocio, fila_ubicacion,
-                fila_actividad, fila_fecha_vence, fila_no_recibo, fila_lugar_fecha],
+                fila_actividad, fila_lugar_fecha],
             colWidths=[300, 400]
         )
 

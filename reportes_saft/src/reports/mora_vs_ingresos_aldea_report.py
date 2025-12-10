@@ -278,7 +278,6 @@ class MoravsIngresosAldeaReport:
             total_ingresos += ingresos
             total_facturas_mora += fact_mora
             total_mora += mora
-
             fila_actual += 1
 
         # ===============================

@@ -1,4 +1,4 @@
-from flet import Container, Row, Text, Offset, Animation, TextField, IconButton, InputBorder, AnimationCurve, MainAxisAlignment, Icon, Icons, FontWeight, TextAlign, Padding, TextField, TextStyle
+from flet import Container, Row, Text, Offset, Animation, TextField, KeyboardType, InputBorder, AnimationCurve, MainAxisAlignment, Icon, Icons, FontWeight, TextAlign, Padding, TextField, TextStyle
 from ui.ui_colors import color_borde, color_bg, color_texto, color_icon_loguin
 
 
@@ -50,7 +50,7 @@ def txt_label_text(text=''):
     )
 
 
-def create_texFiel_fijas(label_text="", visible=True, read_only=True, width=None, ref=None) -> TextField:
+def create_texFiel_fijas(label_text="", visible=True, read_only=True, width=None, ref=None, on_change=None) -> TextField:
     return TextField(
         label=label_text,
         expand=True,
@@ -65,6 +65,7 @@ def create_texFiel_fijas(label_text="", visible=True, read_only=True, width=None
         read_only=read_only,
         bgcolor=color_bg(),
         border_color=borde_color,
+        on_change=on_change,
         label_style=TextStyle(size=text_sise, font_family="Tahoma",
                               color=text_color, weight=FontWeight.W_400,),
         text_style=TextStyle(size=text_sise, font_family="Tahoma", color=text_color, weight=FontWeight.W_400,),)

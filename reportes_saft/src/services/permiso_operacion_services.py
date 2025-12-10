@@ -14,6 +14,7 @@ class PermisooperacionServices:
     def crear_permiso_operacion(self, num_recibo: int, justicia, tipo_per) -> Tra_PermOpe | None:
         permiso: Tra_PermOpe
         existe = self.repo.existe_recibo(num_recibo=num_recibo)
+
         if existe:
             datos = self.repo.recargar_datos(num_recibo=num_recibo)
             if datos:
@@ -49,6 +50,8 @@ class PermisooperacionServices:
                                       NumeroRenovacion=num_renovacion)
         else:
             observ = "Apertura"
+            if justicia:
+                horatio = {}
             datos = self.repo.obtener_datos(num_recibo=num_recibo)
             if not datos:
                 return None

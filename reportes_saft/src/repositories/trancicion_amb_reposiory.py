@@ -3,10 +3,13 @@ class TrancicionAMBRepository:
         self.conexion = conexion
 
     def obtener_amb_urbano(self, codAldea: str, ctaIngreso: str):
-        query = """SELECT COUNT(DISTINCT AvPgEnc.Identidad) AS Total
-                    FROM AvPgEnc INNER JOIN AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                    WHERE (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
+        query = """SELECT        COUNT(DISTINCT AvPgEnc.Identidad) AS Total
+                    FROM            AvPgEnc INNER JOIN
+                    AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
+                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                    CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                    WHERE        (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado <> 3) AND 
+                    (CuentaIngreso_A.Tipo <> 3)
                     """
 
         with self.conexion.cursor() as cur:
@@ -18,10 +21,13 @@ class TrancicionAMBRepository:
             return dict(zip(columns, row))
 
     def obtener_amb_rural(self, codAldea: str, ctaIngreso: str):
-        query = """SELECT COUNT(DISTINCT AvPgEnc.Identidad) AS Total
-                    FROM AvPgEnc INNER JOIN AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                    WHERE (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
+        query = """SELECT        COUNT(DISTINCT AvPgEnc.Identidad) AS Total
+                    FROM            AvPgEnc INNER JOIN
+                    AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
+                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                    CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                    WHERE        (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND  (AvPgEnc.AvPgEstado <> 3) AND 
+                    (CuentaIngreso_A.Tipo <> 3)
                     """
         with self.conexion.cursor() as cur:
             cur.execute(query, (codAldea,  f'{ctaIngreso}%',))
@@ -32,11 +38,13 @@ class TrancicionAMBRepository:
             return dict(zip(columns, row))
 
     def obtener_amb_rural_activos(self, codAldea: str, anio: int, ctaIngreso: str):
-        query = """SELECT COUNT(DISTINCT AvPgEnc.Identidad) AS Total
-                    FROM AvPgEnc INNER JOIN AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                    WHERE (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
-                    AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)
+        query = """SELECT        COUNT(DISTINCT AvPgEnc.Identidad) AS Total
+                    FROM            AvPgEnc INNER JOIN
+                    AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
+                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                    CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                    WHERE        (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)  AND 
+                    (CuentaIngreso_A.Tipo <> 3)
                     """
         with self.conexion.cursor() as cur:
             cur.execute(query, (codAldea, f'{ctaIngreso}%', anio))
@@ -47,12 +55,15 @@ class TrancicionAMBRepository:
             return dict(zip(columns, row))
 
     def obtener_amb_urbano_activos(self, codAldea: str, anio: int, ctaIngreso: str):
-        query = """SELECT COUNT(DISTINCT AvPgEnc.Identidad) AS Total
-                    FROM AvPgEnc INNER JOIN AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                    WHERE (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
-                    AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)
-                    """
+        query = """
+                    SELECT        COUNT(DISTINCT AvPgEnc.Identidad) AS Total
+                    FROM            AvPgEnc INNER JOIN
+                    AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
+                    Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                    CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                    WHERE        (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)  AND 
+                    (CuentaIngreso_A.Tipo <> 3)
+                         """
         with self.conexion.cursor() as cur:
             cur.execute(query, (codAldea, f'{ctaIngreso}%', anio))
             row = cur.fetchone()
@@ -67,8 +78,9 @@ class TrancicionAMBRepository:
                 SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
                 FROM AvPgEnc INNER JOIN
                 AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                WHERE (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
+                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                WHERE  (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado <> 3) AND (CuentaIngreso_A.Tipo <> 3)
                 GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
               """
 
@@ -85,9 +97,11 @@ class TrancicionAMBRepository:
                 SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
                 FROM AvPgEnc INNER JOIN
                 AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                WHERE (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?)
+                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                WHERE  (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado <> 3) AND (CuentaIngreso_A.Tipo <> 3)
                 GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
+            
               """
 
         with self.conexion.cursor() as cur:
@@ -99,14 +113,15 @@ class TrancicionAMBRepository:
             return [dict(zip(columns, r)) for r in rows]
 
     def obtener_amb_rural_activos_detalle(self, codAldea: str, anio: int, ctaIngreso: str):
-        query = """SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
+        query = """
+                SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
                 FROM AvPgEnc INNER JOIN
                 AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                WHERE (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)
+                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                WHERE  (Contribuyente.CodAldea <> ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (CuentaIngreso_A.Tipo <> 3) and YEAR(AvPgEnc.FechaVenceAvPg)  = ?
                 GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
-                    
-                    """
+            """
         with self.conexion.cursor() as cur:
             cur.execute(query, (codAldea, f'{ctaIngreso}%', anio))
             rows = cur.fetchall()
@@ -119,11 +134,11 @@ class TrancicionAMBRepository:
         query = """SELECT Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
                 FROM AvPgEnc INNER JOIN
                 AvPgDetalle ON AvPgEnc.NumAvPg = AvPgDetalle.NumAvPg INNER JOIN
-                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad
-                WHERE (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (DATEPART(year, AvPgEnc.FechaVenceAvPg) = ?)
+                Contribuyente ON AvPgEnc.Identidad = Contribuyente.Identidad INNER JOIN
+                CuentaIngreso_A ON AvPgDetalle.CtaIngreso = CuentaIngreso_A.CtaIngreso AND YEAR(AvPgEnc.FechaVenceAvPg) = CuentaIngreso_A.Anio
+                WHERE  (Contribuyente.CodAldea = ?) AND (AvPgDetalle.CtaIngreso LIKE ?) AND (AvPgEnc.AvPgEstado = 2) AND (CuentaIngreso_A.Tipo <> 3) and YEAR(AvPgEnc.FechaVenceAvPg)  = ?
                 GROUP BY Contribuyente.Identidad, Contribuyente.Pnombre, Contribuyente.SNombre, Contribuyente.PApellido, Contribuyente.SApellido
-                    
-                    """
+             """
         with self.conexion.cursor() as cur:
             cur.execute(query, (codAldea, f'{ctaIngreso}%', anio))
             rows = cur.fetchall()

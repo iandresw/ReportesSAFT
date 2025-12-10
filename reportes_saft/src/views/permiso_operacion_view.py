@@ -3,6 +3,7 @@ import webbrowser
 import flet as ft
 from models.tra_permop import Tra_PermOpe
 from ui.ui_alertas import AlertaGeneral
+from ui.modals.venta_alcohol_modal import abril_venta_alcohol_modal
 from ui.ui_checkBox import createCheckBox
 from ui.ui_colors import color_bg, color_bg_2, color_texto, color_texto_2, color_texto_parrafo
 from ui.ui_radio import create_radio
@@ -35,6 +36,8 @@ class VistaPermisoOperacion:
             self.app, self.datos_system)
 
         self.chk_firma_justicia = createCheckBox("¿Firma Justicia?")
+        self.chk_horario_alcohol = createCheckBox(
+            "¿Horario Venta de Alcohol?", on_change=self.is_Horario_venta_alcol)
 
         self.rd_tipo_solcitud = ft.RadioGroup(disabled=True, content=ft.Row(
             [create_radio(value="Apertura", label_text="Apertura"),
@@ -48,9 +51,10 @@ class VistaPermisoOperacion:
                 create_radio(value="2", label_text="Firma Unidad Ambiental")],),
         )
         if self.datos_muni["CodMuni"] == "1001":
-            self.firma = self.rd_firma
+            self.firma = ft.Row([self.rd_firma, self.chk_horario_alcohol])
         else:
             self.firma = self.chk_firma_justicia
+
         # ALERTAS
         self.alert_recibo = AlertaGeneral(
             titulo=ft.Text("Permiso de Operación"),
@@ -72,6 +76,11 @@ class VistaPermisoOperacion:
             width=130,
             disabled=True,
             on_click=self.imprimir_rept_po)
+        self.btn_horario = create_boton(
+            "Horario Venta de Alcohol",
+            width=130,
+            disabled=False,
+            on_click=self.abrir_modal_venta_bebida)
         self.btn_editar = create_boton("Editar", width=130, disabled=True)
         # CAJAS DE TEXTO
         self.txt_no_recibo = create_texFiel_fijas(
@@ -166,7 +175,7 @@ class VistaPermisoOperacion:
                 ft.Divider(),
                 ft.Row(
                     alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
-                    controls=[self.btn_guardar, self.btn_editar, self.btn_imprimir
+                    controls=[self.btn_guardar, self.btn_horario, self.btn_imprimir
                               ],
                 ),
             ],
@@ -187,6 +196,17 @@ class VistaPermisoOperacion:
             self.frame
         ])
 
+    def is_Horario_venta_alcol(self, e):
+        if e.target.value:
+            self.btn_horario.disabled = False
+        else:
+            self.btn_horario.disabled = True
+
+    def abrir_modal_venta_bebida(self, e):
+        self.dialog = abril_venta_alcohol_modal(self)
+        self.page.open(self.dialog)
+        self.page.update()
+
     def acetar_reg(self, e):
         self.alert_recibo.open = False
         self.alert_recibo.update()
@@ -194,7 +214,7 @@ class VistaPermisoOperacion:
     def consultar_recibo(self, e):
         num_recibo = self.txt_no_recibo.value
         existe = self.repo_permiso.existe_po(num_recibo)
-        justicia = self.firma.value
+        justicia = self.chk_firma_justicia.value
         tipo_per = self.rd_tipo_solcitud.value
         self.permiso = self.repo_permiso.crear_permiso_operacion(
             int(num_recibo), justicia, tipo_per)  # type: ignore
@@ -227,8 +247,8 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = True
             self.btn_imprimir.update()
-            self.firma.disabled = False
-            self.firma.update()
+            self.rd_firma.disabled = False
+            self.rd_firma.update()
             self.rd_tipo_solcitud.update()
 
         else:
@@ -248,7 +268,7 @@ class VistaPermisoOperacion:
         self.page.update()
 
     def guardar_recibo_po(self, e):
-        self.permiso.FirmaJ = self.firma.value
+        self.permiso.FirmaJ = self.rd_firma.value
         if self.repo_permiso.guardar_perm_operacion(self.permiso):
             self.btn_guardar.disabled = True
             self.btn_guardar.style.bgcolor = self.bg_2_color
@@ -260,10 +280,11 @@ class VistaPermisoOperacion:
 
     def imprimir_rept_po(self, e):
         try:
-            justicia = self.firma.value
+            justicia = self.rd_firma.value
+            horario_alcoho = self.chk_horario_alcohol.value
             if self.datos_muni["CodMuni"] == "1001":
                 reporte = PerOpeLaEsperanzaReport(
-                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)  # type: ignore
+                    self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin, horario_alcohol=horario_alcoho)  # type: ignore
             elif self.datos_muni["CodMuni"] == "1403":
                 reporte = PerOpeConcepcionReport(
                     self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin)  # type: ignore
@@ -327,3 +348,7 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             self.page.update()
+
+    def cerrar_modal(self):
+        self.dialog.open = False
+        self.page.update()

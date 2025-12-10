@@ -31,7 +31,13 @@ def add_background(canvas, doc, image_path):
     )
 
 
-locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
+for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
+    try:
+        locale.setlocale(locale.LC_TIME, loc)
+        print("Locale aplicado:", loc)
+        break
+    except locale.Error:
+        pass
 # ==== Registrar fuentes Malgun desde carpeta local ====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # sube un nivel desde reports/
@@ -81,12 +87,13 @@ if os.path.exists(font_britannic_bold):
 
 
 class PerOpeLaEsperanzaReport:
-    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False):
+    def __init__(self, datos: Tra_PermOpe, municipio, titulo_reporte, firma_justicia=False, municipio_admin=False, horario_alcohol=False):
         self.datos = datos
         self.municipio = municipio
         self.titulo = titulo_reporte
         self.justicia_firma = firma_justicia
         self.muni_admin = municipio_admin
+        self.horario = horario_alcohol
 
     def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
         doc = SimpleDocTemplate(ruta_salida, pagesize=(612, 460),
@@ -104,6 +111,14 @@ class PerOpeLaEsperanzaReport:
             "Periodo": self.datos.Periodo
         }, ensure_ascii=False)
 
+        qr_img = qrcode.make(permiso_datos)
+        buffer = BytesIO()
+        qr_img.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        # crea Flowable Image para ReportLab
+        qr_flowable = Image(buffer, width=60, height=60)
+
         estilos = estilos_parrafo()
 
         municipalidad = Paragraph(
@@ -115,34 +130,64 @@ class PerOpeLaEsperanzaReport:
         telefonos = Paragraph(
             f"TELEFONO: {self.municipio["Telefono"]}, {self.municipio["Fax"]}", estilos["la_esperanza_telefono"],)
 
+        titulo_dom_jue = [
+            Paragraph(f"<u>DE DOMINGO A JUEVES</u>", estilos["horario_title"],)
+        ]
+        titulo_vie_sab = [
+            Paragraph(f"<u>VIERNES A SÁBADO</u>", estilos["horario_title"],)
+        ]
+        titulo_festivo = [
+            Paragraph(f"<u>DIAS FESTIVOS</u>", estilos["horario_title"],)
+        ]
+        hora_dom_jue = [
+            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+        ]
+        hora_vie_sab = [
+            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+        ]
+        hora_festivo = [
+            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+        ]
+        ult_linea = [
+            Paragraph(f"", estilos["horario"],),
+        ]
+
+        tabla_horario = Table(
+            [
+                titulo_dom_jue,
+                hora_dom_jue,
+                titulo_vie_sab,
+                hora_vie_sab,
+                titulo_festivo,
+                hora_festivo,
+                ult_linea
+            ],
+            colWidths=[110]
+        )
+
 # TABLA PROPIETARIO
         fila_negocio = [
             Paragraph(f"NOMBRE DEL NEGOCIO:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
             Paragraph(f"{self.datos.Negocio}",
                       estilos["la_esperanza_campos"],),
         ]
         fila_rtn = [
             Paragraph(f"RTN:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
             Paragraph(f"{self.datos.rtn}", estilos["la_esperanza_campos"]),
         ]
         fila_propitario = [
             Paragraph(f"PROPIETARIO:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
             Paragraph(f"{self.datos.Propietario}",
                       estilos["la_esperanza_campos"]),
         ]
         fila_ubicacion = [
             Paragraph(f"UBICACION:", estilos["la_esperanza_campos"],),
-            Paragraph(f""),
             Paragraph(f"{self.datos.Direccion}",
                       estilos["la_esperanza_campos"],),
         ]
         fila_actividad = [
             Paragraph(f"ACTIVIDAD PRINCIPAL:",
                       estilos["la_esperanza_campos"],),
-            Paragraph(f""),
             Paragraph(f"{self.datos.Actividad}",
                       estilos["la_esperanza_campos"],),
         ]
@@ -162,7 +207,7 @@ class PerOpeLaEsperanzaReport:
         tabla_datos = Table(
             [fila_negocio, fila_rtn, fila_propitario,
                 fila_ubicacion, fila_actividad],
-            colWidths=[180, 20, 300]
+            colWidths=[160,  240]
         )
         footer = Table(
             [fila_footer],
@@ -176,16 +221,66 @@ class PerOpeLaEsperanzaReport:
             ("TOPPADDING", (0, 0), (-1, -1), 4),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             # Fondo gris para valores
-            ("BACKGROUND", (0, 1), (0, -1), colors.transparent),
-            ("BACKGROUND", (1, 1), (1, -1), colors.transparent),
+            ("BACKGROUND", (0, 0), (0, -1), colors.transparent),
+            ("BACKGROUND", (1, 0), (1, -1), colors.transparent),
         ])
         tabla_datos.setStyle(estilo)
+        tabla_horario.setStyle(
+            TableStyle([
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("BOX", (0, 0), (-1, -1), 1, colors.red),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.transparent),
+            ])
+        )
 
         ahora = self.datos.Fecha
         dia = ahora.day
         mes = ahora.strftime("%B")
         anio = ahora.year
+        fila_alcol = [tabla_horario]
+        fila_qr = [qr_flowable]
+        if self.horario:
+            tabla_alcohol_qr = Table([fila_alcol, fila_qr],
+                                     colWidths=[130])
+        else:
+            tabla_alcohol_qr = Table([fila_qr],
+                                     colWidths=[130])
+        tabla_alcohol_qr.setStyle(
+            TableStyle([
 
+                ("ALIGN",  (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+
+            ])
+        )
+
+        fila = [tabla_datos, tabla_alcohol_qr]
+
+        tabla = Table(
+            [fila,],
+            colWidths=[400, 120]
+        )
+        tabla.setStyle(
+            TableStyle([
+                ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                ("ALIGN",  (1, 0), (1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+
+            ])
+        )
 
 # TEXTOS
         texto1 = Paragraph(
@@ -195,16 +290,9 @@ class PerOpeLaEsperanzaReport:
         num_permiso = Paragraph(
             f"{self.datos.NoPermiso}", estilos["la_esperanza_num_ope"])
 
-        qr_img = qrcode.make(permiso_datos)
-        buffer = BytesIO()
-        qr_img.save(buffer, format="PNG")
-        buffer.seek(0)
-
-        # crea Flowable Image para ReportLab
-        qr_flowable = Image(buffer, width=60, height=60)
 
 # TABLA FIRMA
-        if not self.justicia_firma:
+        if self.justicia_firma == "0":
             valores_fila = [
                 Paragraph("",),
                 Paragraph(f"{self.muni_admin["Alcalde"]}",
@@ -247,7 +335,7 @@ class PerOpeLaEsperanzaReport:
                 valor_firma = "Nombre Ambiental"
             valores_fila = [
                 Paragraph(f"{self.muni_admin["Alcalde"]}",
-                          estilos["la_esperanza_campos_firma"]),
+                          estilos["la_esperanza_firma_alc"]),
                 Paragraph(""),
                 Paragraph(valor_firma,
                           estilos["la_esperanza_campos_firma"]),
@@ -257,7 +345,7 @@ class PerOpeLaEsperanzaReport:
             ]
             valores_fila_1 = [
                 Paragraph("ALCALDE MUNICIPAL",
-                          estilos["la_esperanza_campos_firma"]),
+                          estilos["la_esperanza_firma_alc"]),
                 Paragraph(""),
                 Paragraph(label,
                           estilos["la_esperanza_campos_firma"]),
@@ -293,8 +381,8 @@ class PerOpeLaEsperanzaReport:
                            color=colors.black, spaceBefore=10, spaceAfter=10)
         # elementos.append(linea)
         elementos.append(Spacer(1, 10))
-        elementos.append(tabla_datos)
-
+        # elementos.append(tabla_datos)
+        elementos.append(tabla)
         elementos.append(texto1)
 
         elementos.append(footer)

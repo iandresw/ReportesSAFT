@@ -298,3 +298,15 @@ async def generar_analisis_ingresos(vista, e):
         ),
         tipo="excel"
     )
+
+
+async def anula_plan_pago(vista, e):
+    identidad = vista.identidad.current.value
+    titulo_rpt = f"Analis de Ingresos  vs"
+
+    if not identidad:
+        snack_error_reporte(
+            vista.page, "debe de ingresar una identidad valida")
+        return
+    vista.cerrar_modal()
+    await vista.plan_pago.planes_de_pago(identidad=identidad)
