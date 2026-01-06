@@ -11,7 +11,7 @@ class PermisooperacionServices:
         self.sys = sistem
         self.anio = datetime.now().year
 
-    def crear_permiso_operacion(self, num_recibo: int, justicia, tipo_per) -> Tra_PermOpe | None:
+    def crear_permiso_operacion(self, num_recibo: int, justicia, tipo_per, horario) -> Tra_PermOpe | None:
         permiso: Tra_PermOpe
         existe = self.repo.existe_recibo(num_recibo=num_recibo)
 
@@ -47,7 +47,8 @@ class PermisooperacionServices:
                                       FechaNac=datos['FechaNac'],
                                       rtn=datos['rtn'],
                                       Telefono=datos['Telefono'],
-                                      NumeroRenovacion=num_renovacion)
+                                      NumeroRenovacion=num_renovacion,
+                                      HorarioAlcohol=datos['HorarioAlcohol'])
         else:
             observ = "Apertura"
             if justicia:
@@ -69,7 +70,7 @@ class PermisooperacionServices:
                                   Direccion=datos['Direccion'],
                                   idrepresentante=datos['IdRepresentante'],
                                   Negocio=datos['Negocio'],
-                                  NoPermiso=int(num_permiso["UltNumPO"])+1,
+                                  NoPermiso=num_permiso,
                                   Periodo=self.anio,
                                   Propietario=f"{datos['Pnombre']} {datos['SNombre']} {datos['PApellido']} {datos['SApellido']}",
                                   Ubicacion=datos['Direccion'],
@@ -86,12 +87,12 @@ class PermisooperacionServices:
                 FechaNac=datos['FechaNac'],
                 rtn=datos['rtn'],
                 Telefono=datos['Telefono'],
-                NumeroRenovacion=num_renovacion)
+                NumeroRenovacion=num_renovacion, HorarioAlcohol=horario)
         return permiso  # type: ignore
 
     def guardar_perm_operacion(self, data: Tra_PermOpe):
         return self.repo.insertar_tra_perm_ope(data.NoPermiso, data.Periodo, data.Identidad, data.Negocio, data.Propietario,
-                                               data.Ubicacion, data.Actividad, data.Observacion, data.Fecha, data.CodAldea, data.NumRecibo, data.FirmaJ, data.Usuario)
+                                               data.Ubicacion, data.Actividad, data.Observacion, data.Fecha, data.CodAldea, data.NumRecibo, data.FirmaJ, data.Usuario, data.HorarioAlcohol)
 
     def existe_po(self, num_recibo: int):
         return self.repo.existe_recibo(num_recibo=num_recibo)

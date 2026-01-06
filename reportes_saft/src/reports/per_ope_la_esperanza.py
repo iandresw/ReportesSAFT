@@ -34,7 +34,6 @@ def add_background(canvas, doc, image_path):
 for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
     try:
         locale.setlocale(locale.LC_TIME, loc)
-        print("Locale aplicado:", loc)
         break
     except locale.Error:
         pass
@@ -43,34 +42,39 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # sube un nivel desde reports/
 FONTS_DIR = os.path.join(BASE_DIR, "..", "fonts")
 
+
 # Rutas de fuentes
-font_regular = os.path.join(FONTS_DIR, "malgun.ttf")
-font_bold = os.path.join(FONTS_DIR, "malgunbd.ttf")
-font_GOTHICB = os.path.join(FONTS_DIR, "GOTHICB.TTF")
-font_GOTHICB0 = os.path.join(FONTS_DIR, "GOTHICB0.TTF")
-font_Jhenghei = os.path.join(FONTS_DIR, "Jhenghei.ttf")
+
 font_Century_Gothic = os.path.join(FONTS_DIR, "Century-Gothic.ttf")
 font_arial_rounded_mt = os.path.join(
     FONTS_DIR, "Arial-Rounded-MT-Bold-Bold.ttf")
 font_arial_unicode_ms = os.path.join(FONTS_DIR, "Arial-Unicode-MS-Regular.ttf")
 font_britannic_bold = os.path.join(FONTS_DIR, "Britannic-Bold-Bold.ttf")
-# Registrar fuentes si existen
-# Registrar fuentes si existen
-if os.path.exists(font_regular):
-    pdfmetrics.registerFont(TTFont('Malgun', font_regular))
-    addMapping('Malgun', 0, 0, 'Malgun')  # Normal
 
-if os.path.exists(font_bold):
-    pdfmetrics.registerFont(TTFont('Malgun-Bold', font_bold))
-    addMapping('Malgun', 1, 0, 'Malgun-Bold')  # Bold
+amasis_mt_md = os.path.join(FONTS_DIR, "amasis-mt-md.ttf")
+amasis_bold = os.path.join(FONTS_DIR, "Amasis-MT-Std-Bold.ttf")
+aharoni_bold = os.path.join(FONTS_DIR, "ahronbd.ttf")
+abadi = os.path.join(FONTS_DIR, "AbadiMTPro.ttf")
+abadi_bold = os.path.join(FONTS_DIR, "AbadiMTPro-Bold.ttf")
+if os.path.exists(amasis_mt_md):
+    pdfmetrics.registerFont(TTFont('AMASI', amasis_mt_md))
+    addMapping('AMASI', 0, 0, 'AMASI')
+    # Bold
+if os.path.exists(amasis_bold):
+    pdfmetrics.registerFont(TTFont("AMASIS-BOLD", amasis_bold))
+    addMapping("AMASIS", 1, 0, "AMASIS-BOLD")
+if os.path.exists(aharoni_bold):
+    pdfmetrics.registerFont(TTFont("AHARONI-BOLD", aharoni_bold))
+    addMapping("AHARONI", 1, 0, "AHARONI-BOLD")
 
-if os.path.exists(font_GOTHICB):
-    pdfmetrics.registerFont(TTFont('GOTHICB', font_GOTHICB))
-    addMapping('GOTHICB', 1, 0, 'GOTHICB')  # Bold
+if os.path.exists(abadi_bold):
+    pdfmetrics.registerFont(TTFont("ABADI", abadi))
+    addMapping("ABADI", 0, 0, "ABADI")
 
-if os.path.exists(font_GOTHICB0):
-    pdfmetrics.registerFont(TTFont('GOTHICB0', font_GOTHICB0))
-    addMapping('GOTHICB', 0, 0, 'GOTHICB0')  # Regular
+if os.path.exists(abadi_bold):
+    pdfmetrics.registerFont(TTFont("ABADI-BOLD", abadi_bold))
+    addMapping("ABADI", 1, 0, "ABADI-BOLD")
+    # Bold
 
 if os.path.exists(font_arial_rounded_mt):
     pdfmetrics.registerFont(
@@ -95,11 +99,15 @@ class PerOpeLaEsperanzaReport:
         self.muni_admin = municipio_admin
         self.horario = horario_alcohol
 
+      # Media carta, horizontalmente en vertical
+
     def generar_pdf(self, ruta_salida="mora_bi_report.pdf"):
-        doc = SimpleDocTemplate(ruta_salida, pagesize=(612, 460),
-                                leftMargin=40,
-                                rightMargin=40,
-                                topMargin=50,
+        width, height = letter  # Página completa letter
+        half_height = height / 2
+        doc = SimpleDocTemplate(ruta_salida, pagesize=(width, 458.64),
+                                leftMargin=30,
+                                rightMargin=30,
+                                topMargin=30,
                                 bottomMargin=0)
         elementos = []
         permiso_datos = json.dumps({
@@ -129,28 +137,74 @@ class PerOpeLaEsperanzaReport:
             f"PERMISO DE OPERACIÓN DE NEGOCIOS {self.datos.Periodo}", estilos["la_esperanza_title_ope"],)
         telefonos = Paragraph(
             f"TELEFONO: {self.municipio["Telefono"]}, {self.municipio["Fax"]}", estilos["la_esperanza_telefono"],)
-
-        titulo_dom_jue = [
-            Paragraph(f"<u>DE DOMINGO A JUEVES</u>", estilos["horario_title"],)
-        ]
-        titulo_vie_sab = [
-            Paragraph(f"<u>VIERNES A SÁBADO</u>", estilos["horario_title"],)
-        ]
-        titulo_festivo = [
-            Paragraph(f"<u>DIAS FESTIVOS</u>", estilos["horario_title"],)
-        ]
-        hora_dom_jue = [
-            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
-        ]
-        hora_vie_sab = [
-            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
-        ]
-        hora_festivo = [
-            Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
-        ]
-        ult_linea = [
-            Paragraph(f"", estilos["horario"],),
-        ]
+        if self.horario == '1':
+            titulo_dom_jue = [
+                Paragraph(f"<u>DE DOMINGO A JUEVES</u>",
+                          estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"<u>VIERNES A SÁBADO</u>",
+                          estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"<u>DIAS FESTIVOS</u>", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"10:00 AM A 9:00 PM", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+        elif self.horario == '2':
+            titulo_dom_jue = [
+                Paragraph(f"ESTE NEGOCIO", estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"AUTORIZADO", estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"DE BEBIDAS", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"NO ESTA", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"PARA VENTA ", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"ALCOHOLICAS", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+        else:
+            titulo_dom_jue = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            titulo_vie_sab = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            titulo_festivo = [
+                Paragraph(f"", estilos["horario_title"],)
+            ]
+            hora_dom_jue = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            hora_vie_sab = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            hora_festivo = [
+                Paragraph(f"", estilos["horario"],),
+            ]
+            ult_linea = [
+                Paragraph(f"", estilos["horario"],),
+            ]
 
         tabla_horario = Table(
             [
@@ -186,7 +240,7 @@ class PerOpeLaEsperanzaReport:
                       estilos["la_esperanza_campos"],),
         ]
         fila_actividad = [
-            Paragraph(f"ACTIVIDAD PRINCIPAL:",
+            Paragraph(f"<b>ACTIVIDAD PRINCIPAL: </b>",
                       estilos["la_esperanza_campos"],),
             Paragraph(f"{self.datos.Actividad}",
                       estilos["la_esperanza_campos"],),
@@ -194,11 +248,11 @@ class PerOpeLaEsperanzaReport:
 
         fila_footer = [
             Paragraph(
-                f"Valido hasta el 31 de Diciembre del año {self.datos.Periodo}", estilos["la_esperanza_parrafo"]),
+                f"(Vence el 31 de diciembre del {self.datos.Periodo})", estilos["la_esperanza_parrafo"]),
             Paragraph(""),
             Paragraph(f"NO NEGOCIABLE", estilos["la_esperanza_parrafo"]),
             Paragraph(""),
-            Paragraph(f"NOTA: Sin firma y sin sello no es valido.",
+            Paragraph(f"<b>NOTA:</b> Sin firma y sin sello no es valido.",
                       estilos["la_esperanza_parrafo"]),
         ]
 
@@ -244,7 +298,7 @@ class PerOpeLaEsperanzaReport:
         anio = ahora.year
         fila_alcol = [tabla_horario]
         fila_qr = [qr_flowable]
-        if self.horario:
+        if self.horario != '0':
             tabla_alcohol_qr = Table([fila_alcol, fila_qr],
                                      colWidths=[130])
         else:
@@ -284,11 +338,11 @@ class PerOpeLaEsperanzaReport:
 
 # TEXTOS
         texto1 = Paragraph(
-            f"De acuerdo al artículo N.124 del reglamento de la ley de Municipalidades, para la apertura y operación de establecimientos comerciales en este Municipio, el suscrito Alcalde Municipal concede el presente permiso el cual deberá ser colocado en un sitio visible. Dado en la ciudad de la Esperanza, Departamento de Intibucá, a los {dia} días del mes de {mes} del año {anio}. ", estilos["la_esperanza_parrafo"])
+            f"<b>De acuerdo al artículo N.124</b> del reglamento de la ley de Municipalidades, para la apertura y operación de establecimientos comerciales en este Municipio, el suscrito Alcalde Municipal concede el presente permiso el cual deberá ser colocado en un sitio visible. Dado en la ciudad de la Esperanza, Departamento de Intibucá, a los {dia} días del mes de {mes} del año {anio}. ", estilos["la_esperanza_parrafo"])
 
 # TABLA QR
         num_permiso = Paragraph(
-            f"{self.datos.NoPermiso}", estilos["la_esperanza_num_ope"])
+            f"{self.datos.NoPermiso:04d}", estilos["la_esperanza_num_ope"])
 
 
 # TABLA FIRMA
@@ -329,23 +383,22 @@ class PerOpeLaEsperanzaReport:
         else:
             if self.justicia_firma == "1":
                 label = "JUSTICIA MUNICIPAL"
-                valor_firma = "Nombre Justicia"
+                valor_firma = self.muni_admin["Justicia"]
             else:
                 label = "UNIDAD AMBIENTAL"
-                valor_firma = "Nombre Ambiental"
+                valor_firma = self.muni_admin["Ambiental"]
             valores_fila = [
                 Paragraph(f"{self.muni_admin["Alcalde"]}",
-                          estilos["la_esperanza_firma_alc"]),
-                Paragraph(""),
-                Paragraph(valor_firma,
                           estilos["la_esperanza_campos_firma"]),
+                Paragraph(""),
+                Paragraph(valor_firma, estilos["la_esperanza_campos_firma"]),
                 Paragraph(""),
                 Paragraph(f"{self.muni_admin["Tesorero"]}",
                           estilos["la_esperanza_campos_firma"]),
             ]
             valores_fila_1 = [
                 Paragraph("ALCALDE MUNICIPAL",
-                          estilos["la_esperanza_firma_alc"]),
+                          estilos["la_esperanza_campos_firma"]),
                 Paragraph(""),
                 Paragraph(label,
                           estilos["la_esperanza_campos_firma"]),
@@ -370,6 +423,7 @@ class PerOpeLaEsperanzaReport:
                 ("TOPPADDING", (0, 0), (-1, -1), 4),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ]))
+
         elementos.append(num_permiso)
         elementos.append(municipalidad)
 
@@ -389,7 +443,7 @@ class PerOpeLaEsperanzaReport:
         elementos.append(Spacer(1, 40))
         elementos.append(tabla_firma)
         background_image = os.path.join(
-            BASE_DIR, "..", "assets", "per_ope_la_esperanza.png")
+            BASE_DIR, "..", "assets", "per_ope_la_esperanza.jpg")
         doc.build(elementos,
                   onFirstPage=lambda canvas, doc: add_background(
                       canvas, doc, background_image),

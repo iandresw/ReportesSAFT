@@ -26,3 +26,4 @@ class Tra_PermOpe:
     rtn: str
     Telefono: str
     NumeroRenovacion: int
+    HorarioAlcohol: int

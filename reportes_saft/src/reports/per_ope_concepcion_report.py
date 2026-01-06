@@ -20,7 +20,6 @@ from reportlab.pdfgen import canvas
 for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
     try:
         locale.setlocale(locale.LC_TIME, loc)
-        print("Locale aplicado:", loc)
         break
     except locale.Error:
         pass
@@ -194,8 +193,8 @@ class PerOpeConcepcionReport:
         # sube un nivel → assets
         ASSETS_DIR = os.path.join(BASE_DIR, "..", "assets")
 
-        logo_mun = Image(os.path.join(
-            ASSETS_DIR, "logo_concepcion.png"), width=(5.84*cm), height=(3.52*cm))
+        logo_mun = Image(os.path.join(ASSETS_DIR, "logo_concepcion.png"), width=(
+            5.84*cm), height=(3.52*cm))
         escudo_nac = Image(os.path.join(
             ASSETS_DIR, "logo_escudo_mini.png"), width=(2.37*cm), height=(3.46*cm))
 

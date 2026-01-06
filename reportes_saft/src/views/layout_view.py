@@ -1,33 +1,21 @@
 import flet as ft
-import logging
 import os
 from contexts.app_context import AppContext
 from ui.dashboard.vista_dashboard import VistaDashBoard
 from views.permiso_operacion_view import VistaPermisoOperacion
 from ui.ui_container import create_container_rail
 from views.about_view import VistaAbout
-# from views.reportes_view import VistaReportes
 from ui.ui_colors import color_bg, color_bg_2, color_shadow, color_texto
 from services.parametro_service import ParametroService
 from ui.reports.vista_reportes import VistaReportes
-os.makedirs("logs", exist_ok=True)
-
-logging.basicConfig(
-    filename="logs/logs_rpt_py.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 
 class UILayout(ft.Container):
-    def __init__(self, page: ft.Page, context):
+    def __init__(self, page: ft.Page, context, logger):
         super().__init__(expand=True)
         self.page = page
         self.x_width = 900
         self.x_height = 710
-        # self.page.window.width = 900
-        # self.page.window.height = 90
-        # self.page.window.center()
         self.page.window.max_height = 1000000
         self.page.window.min_height = 800
         self.page.window.max_width = 10000
@@ -41,6 +29,7 @@ class UILayout(ft.Container):
         self.page.padding = 15
         self.context = context
         self.context.init_saft()
+
         self.page.window.icon = "assets/icon.ico"
         self.page.update()
         text_color = color_texto()

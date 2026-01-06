@@ -37,21 +37,36 @@ class VistaPermisoOperacion:
 
         self.chk_firma_justicia = createCheckBox("¿Firma Justicia?")
         self.chk_horario_alcohol = createCheckBox(
-            "¿Horario Venta de Alcohol?", on_change=self.is_Horario_venta_alcol)
+            "¿Horario Venta de Alcohol?", on_change=self.is_Horario_venta_alcol, disable=True)
+
+        self.rd_horario_alcohol = ft.RadioGroup(disabled=True, value='0',
+                                                on_change=self.is_firma_justicia, content=ft.Row(
+
+                                                    [
+                                                        create_radio(
+                                                            value="0", label_text="Ninguno"),
+                                                        create_radio(
+                                                            value="1", label_text="¿Horario Venta de Alcohol?"),
+                                                        create_radio(value="2", label_text="No se Permite la Venta")],),
+                                                )
 
         self.rd_tipo_solcitud = ft.RadioGroup(disabled=True, content=ft.Row(
             [create_radio(value="Apertura", label_text="Apertura"),
              create_radio(value="Renovacion", label_text="Renovación")],),
         )
-        self.rd_firma = ft.RadioGroup(disabled=True, value='0', content=ft.Row(
+        self.rd_firma = ft.RadioGroup(disabled=True, value='0',
+                                      on_change=self.is_firma_justicia, content=ft.Row(
 
-            [
-                create_radio(value="0", label_text="Ninguno"),
-                create_radio(value="1", label_text="Firma Justicia Municipal"),
-                create_radio(value="2", label_text="Firma Unidad Ambiental")],),
-        )
+                                          [
+                                              create_radio(
+                                                  value="0", label_text="Ninguno"),
+                                              create_radio(
+                                                  value="1", label_text="Firma Justicia Municipal"),
+                                              create_radio(value="2", label_text="Firma Unidad Ambiental")],),
+                                      )
         if self.datos_muni["CodMuni"] == "1001":
-            self.firma = ft.Row([self.rd_firma, self.chk_horario_alcohol])
+            self.firma = ft.Row([self.rd_firma, ft.VerticalDivider(
+                width=1, color="black", thickness=1,), self.rd_horario_alcohol])
         else:
             self.firma = self.chk_firma_justicia
 
@@ -168,7 +183,8 @@ class VistaPermisoOperacion:
                     alignment=self.ft.MainAxisAlignment.SPACE_EVENLY,
                     controls=[
                         self.firma,
-                        ft.Divider(),
+                        ft.VerticalDivider(
+                            width=1, color="black", thickness=1,),
                         self.rd_tipo_solcitud,
                     ],
                 ),
@@ -196,6 +212,16 @@ class VistaPermisoOperacion:
             self.frame
         ])
 
+    def is_firma_justicia(self, e):
+        if self.rd_firma.value == '1':
+
+            self.rd_horario_alcohol.disabled = False
+            self.rd_horario_alcohol.update()
+        else:
+            self.rd_horario_alcohol.value = '0'
+            self.rd_horario_alcohol.disabled = True
+            self.rd_horario_alcohol.update()
+
     def is_Horario_venta_alcol(self, e):
         if e.target.value:
             self.btn_horario.disabled = False
@@ -214,10 +240,15 @@ class VistaPermisoOperacion:
     def consultar_recibo(self, e):
         num_recibo = self.txt_no_recibo.value
         existe = self.repo_permiso.existe_po(num_recibo)
-        justicia = self.chk_firma_justicia.value
+        if self.datos_muni["CodMuni"] == "1001":
+            justicia = self.rd_firma.value
+            horario = self.chk_firma_justicia.value
+        else:
+            justicia = self.chk_firma_justicia.value
+            horario = False
         tipo_per = self.rd_tipo_solcitud.value
         self.permiso = self.repo_permiso.crear_permiso_operacion(
-            int(num_recibo), justicia, tipo_per)  # type: ignore
+            int(num_recibo), justicia, tipo_per, horario)  # type: ignore
         if not self.permiso:
             self.page.open(self.alert_recibo)
             return None
@@ -247,8 +278,11 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_2_color
             self.btn_imprimir.disabled = True
             self.btn_imprimir.update()
-            self.rd_firma.disabled = False
-            self.rd_firma.update()
+            if self.datos_muni["CodMuni"] == "1001":
+                self.rd_horario_alcohol.value = '0'
+                self.rd_horario_alcohol.update()
+                self.rd_firma.disabled = False
+                self.rd_firma.update()
             self.rd_tipo_solcitud.update()
 
         else:
@@ -259,8 +293,11 @@ class VistaPermisoOperacion:
             self.btn_imprimir.style.bgcolor = self.bg_color
             self.btn_imprimir.update()
             if self.datos_muni["CodMuni"] == "1001":
-                self.firma.value = str(self.permiso.FirmaJ)
-
+                self.rd_firma.value = str(self.permiso.FirmaJ)
+                self.rd_firma.update()
+                self.rd_horario_alcohol.value = str(
+                    self.permiso.HorarioAlcohol)
+                self.rd_horario_alcohol.update()
             else:
                 self.firma.value = bool(self.permiso.FirmaJ)
             self.firma.disabled = True
@@ -268,7 +305,14 @@ class VistaPermisoOperacion:
         self.page.update()
 
     def guardar_recibo_po(self, e):
-        self.permiso.FirmaJ = self.rd_firma.value
+        if self.datos_muni["CodMuni"] == "1001":
+            self.permiso.FirmaJ = self.rd_firma.value
+            if self.permiso.FirmaJ == 1:
+                self.permiso.HorarioAlcohol = self.rd_horario_alcohol.value
+            else:
+                self.permiso.HorarioAlcohol = '0'
+        else:
+            self.permiso.FirmaJ = self.chk_firma_justicia.value
         if self.repo_permiso.guardar_perm_operacion(self.permiso):
             self.btn_guardar.disabled = True
             self.btn_guardar.style.bgcolor = self.bg_2_color
@@ -280,8 +324,16 @@ class VistaPermisoOperacion:
 
     def imprimir_rept_po(self, e):
         try:
-            justicia = self.rd_firma.value
-            horario_alcoho = self.chk_horario_alcohol.value
+            if self.datos_muni["CodMuni"] == "1001":
+                justicia = self.rd_firma.value
+                if justicia == '1':
+                    horario_alcoho = self.rd_horario_alcohol.value
+                else:
+                    horario_alcoho = '0'
+            else:
+                justicia = self.chk_firma_justicia.value
+                horario_alcoho = '0'
+
             if self.datos_muni["CodMuni"] == "1001":
                 reporte = PerOpeLaEsperanzaReport(
                     self.permiso, self.datos_muni, "", justicia, self.datos_muni_admin, horario_alcohol=horario_alcoho)  # type: ignore

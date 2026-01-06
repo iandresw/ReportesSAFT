@@ -47,7 +47,7 @@ class ParametroRepository:
             FechaCierreAnual, MesActivoInicio, MesActivoFin, TipoNumPartidas, SeqPartidaActual, NombreEmpresa, RtnEmpresa, CtaResultadoPeriodo, CtaResultadoNeto, InicioSistema, NumPartidaActual, MesActivoInicioPres, 
             MesActivoFinPres, CtaContableCaja, DiaProcesoTes, AfectaPresIng, AfectaPresEg, ReciboTes, UltNumCheque, UltNumOC, UltNumOP, MonedaNominal, NombreDepartamento, ModeloBalance, YearPresup, ModuloEnUso, 
             ContaUpdateFromPresu, UltNumFact, UltNumRec, UltNumAbonado, Alcalde, Tesorero, Contabilidad, Administrador, Presupuesto, Auditor, Tributaria, Catastro, CtaCaja, CtaBanco, CopRec, UltNoCai, CodigoCai, FacRes, 
-            UltCat
+            UltCat, Ambiental, Justicia, UltNumPO
         FROM ParametroCont
         """
         with self.conexion.cursor() as cur:

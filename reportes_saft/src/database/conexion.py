@@ -7,9 +7,10 @@ load_dotenv()
 
 
 class ConexionBD:
-    def __init__(self, tipo_bd):
+    def __init__(self, tipo_bd, logger):
         self.tipo_bd = tipo_bd
         self.conexion = None
+        self.log = logger
         self._conectar()
 
     def _conectar(self):
@@ -24,6 +25,7 @@ class ConexionBD:
                 autocommit=True
             )
         else:
+            self.log.error("Tipo de base de datos no válido", exc_info=True)
             raise ValueError(
                 f"Tipo de base de datos no válido: {self.tipo_bd}")
 
@@ -31,13 +33,13 @@ class ConexionBD:
         """Reintenta reconectar en caso de error."""
         for intento in range(1, intentos + 1):
             try:
-                print(
+                self.log.info(
                     f"Intentando reconectar a {self.tipo_bd} (Intento {intento}/{intentos})...")
                 self._conectar()
-                print(f"Reconectado a {self.tipo_bd} exitosamente.")
+                self.log.info(f"Reconectado a {self.tipo_bd} exitosamente.")
                 return
             except Exception as e:
-                print(f"Falló el intento {intento}: {e}")
+                self.log.info(f"Falló el intento {intento}: {e}")
                 time.sleep(espera)
         raise ConnectionError(
             f"No se pudo reconectar a {self.tipo_bd} después de {intentos} intentos.")
@@ -46,14 +48,15 @@ class ConexionBD:
         if self.conexion:
             return self.conexion.cursor()
         else:
+            self.log.info(f"La conexión no está establecida.")
             raise ValueError("La conexión no está establecida.")
 
     def cerrar_conexion(self):
         if self.conexion:
             self.conexion.close()
-            print(f"Conexión {self.tipo_bd} cerrada correctamente.")
+            self.log.info(f"Conexión {self.tipo_bd} cerrada correctamente.")
         else:
-            print("No hay conexión activa para cerrar.")
+            self.log.info(f"No hay conexión activa para cerrar.")
 
     @contextmanager
     def cursor(self):
@@ -61,16 +64,17 @@ class ConexionBD:
         cur = self.obtener_cursor()
         try:
             yield cur
-
         except (pyodbc.Error) as e:
-            print(f"Error de conexión: {e}")
             self.conexion.rollback()
+            self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
             self.reconectar()
             raise
         except Exception as e:
             self.conexion.rollback()
+            self.log.error(f"Rollback realizado en {e} {self.tipo_bd}")
             raise e
         finally:
+            self.log.info(f"Conexión {self.tipo_bd} cerrada.")
             cur.close()
 
     def __enter__(self):
@@ -81,11 +85,11 @@ class ConexionBD:
             try:
                 if exc_type is None:
                     self.conexion.commit()
-                    print(
+                    self.log.info(
                         f"Commit realizado correctamente en {self.tipo_bd}")
                 else:
                     self.conexion.rollback()
-                    print(f"Rollback realizado en {self.tipo_bd}")
+                    self.log.info(f"Rollback realizado en {self.tipo_bd}")
             finally:
                 self.conexion.close()
-                print(f"Conexión {self.tipo_bd} cerrada.")
+                self.log.info(f"Conexión {self.tipo_bd} cerrada.")

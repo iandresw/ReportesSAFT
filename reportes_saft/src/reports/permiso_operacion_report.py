@@ -2,8 +2,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.fonts import addMapping
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable, Image
-from reportlab.graphics.barcode import qr
-from reportlab.graphics.shapes import Drawing
+from reportlab.lib.units import cm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from models.tra_permop import Tra_PermOpe
@@ -17,7 +16,6 @@ from io import BytesIO
 for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
     try:
         locale.setlocale(locale.LC_TIME, loc)
-        print("Locale aplicado:", loc)
         break
     except locale.Error:
         pass
@@ -50,8 +48,6 @@ if os.path.exists(font_regular) and os.path.exists(font_bold):
     addMapping('GOTHICB', 1, 0, 'GOTHICB')
     addMapping('Jhenghei', 0, 0, 'Jhenghei')
     addMapping('Century-Gothic', 1, 0, 'Century-Gothic')
-else:
-    print("Advertencia: no se encontraron las fuentes Malgun en /fonts/")
 
 
 class PermisoOperacionReport:
@@ -221,6 +217,10 @@ class PermisoOperacionReport:
 
         # crea Flowable Image para ReportLab
         qr_flowable = Image(buffer, width=60, height=60)
+        ASSETS_DIR = r"C:\Program Files (x86)\SAFT\LogoMun.png"
+        logo_mun = Image(ASSETS_DIR, width=(
+            2.84*cm), height=(2.52*cm))
+
 
 # TABLA FIRMA
         if not self.justicia_firma:
@@ -272,7 +272,7 @@ class PermisoOperacionReport:
             ]))
 # TABLA ENCABEZADO
         valores_fila = [
-            Paragraph(""),
+            logo_mun,
             titulo,
             qr_flowable
         ]

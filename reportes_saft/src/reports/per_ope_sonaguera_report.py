@@ -20,7 +20,6 @@ from reportlab.pdfgen import canvas
 for loc in ["es_ES", "Spanish", "es-ES", "es_HN", "es_ES.UTF-8"]:
     try:
         locale.setlocale(locale.LC_TIME, loc)
-        print("Locale aplicado:", loc)
         break
     except locale.Error:
         pass

@@ -1,10 +1,10 @@
 
 import asyncio
 import flet as ft
-from ui.btn_actualizar import cerrar_app_boton, create_update_button
-from ui.ui_colors import color_texto, color_bg, color_bg_2, color_texto_parrafo
+from ui.btn_actualizar import cerrar_app_boton, create_update_button, actualizar_base_boton
+from ui.ui_colors import color_texto,  color_texto_parrafo
 from helpers.updater_helper import descargar_actualizacion, reemplazar_archivos
-from utils.utils import close_app, close_updater, is_admin, is_app_running, leer_version_local, leer_version_remota
+from utils.utils import close_app, is_admin, is_app_running, leer_version_local, leer_version_remota
 import os
 import subprocess
 EXE_NAME = "reportes_saft.exe"
@@ -43,6 +43,8 @@ class VistaUpdater:
         self.close_button_actual.visible = False
 
         self.start_button = create_update_button()
+        self.update_bd_button = actualizar_base_boton()
+        self.update_bd_button.on_click = self.alterar_base
         self.start_button.on_click = self.start_update
         if not is_admin():
             self.status.value = "Sin permisos de administrador"
@@ -109,6 +111,16 @@ class VistaUpdater:
         self.page.update()
         await self.start_update()
 
+    async def alterar_base(self, e):
+        from services.data_base_services import DataBaseService
+        from contexts.app_context import AppContext
+        context = AppContext()
+        context.init_saft()
+        servicio = DataBaseService(context.conexion_saft)
+        servicio.alterar_parametro_cont()
+        self.update_status(
+            f"¡Base Actualizada!", busy=False)
+
     def build(self):
         return ft.Container(
             content=ft.Column(
@@ -117,6 +129,7 @@ class VistaUpdater:
                     self.progress,
                     self.status,
                     self.start_button,
+                    self.update_bd_button,
                     self.close_button,
                     self.close_button_actual,
                     self.imagen

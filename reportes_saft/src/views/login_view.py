@@ -7,17 +7,14 @@ from views.layout_view import UILayout
 
 
 class PantallaLogin:
-    def __init__(self, page: ft.Page, context):
+    def __init__(self, page: ft.Page, context, logger):
         self.page = page
         self.context = context
         self.usuario_input = text_usuario()
         self.pass_input = text_usuario_password()
-
         self.msg = ft.Text("", color="red", size=14)
-        self.checkbox = createCheckBox(
-            label_text="Recordar contraseña")
-
-        # Configuración ventana
+        self.checkbox = createCheckBox(label_text="Recordar contraseña")
+        self.log = logger
         self.x_width = 720
         self.x_height = 440
         self.color_bg2 = color_bg()
@@ -56,7 +53,7 @@ class PantallaLogin:
             self.page.update()
             self.page.controls.clear()
 
-            index = UILayout(self.page, self.context)
+            index = UILayout(self.page, self.context, self.log)
             self.page.add(index.build())
         else:
             self.msg.value = "Usuario o contraseña incorrectos"

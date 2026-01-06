@@ -122,17 +122,17 @@ def estilos_parrafo():
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_title',
-        fontSize=14,
+        fontSize=12,
         textColor=colors.black,
-        fontName="Arial-Rounded-MT-Bold",
+        fontName="AHARONI-BOLD",
         leading=15,
         alignment=1,  # justificado
-        spaceBefore=5,
-        spaceAfter=5
+        spaceBefore=0,
+        spaceAfter=0
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_campos',
-        fontSize=12,
+        fontSize=9,
         textColor=colors.black,
         fontName="Arial-Rounded-MT-Bold",
         leading=15,
@@ -142,20 +142,20 @@ def estilos_parrafo():
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_telefono',
-        fontSize=12,
+        fontSize=9,
         textColor="#153D63",
-        fontName="Arial-Unicode-MS",
+        fontName="ABADI-BOLD",
         leading=15,
         alignment=1,  # justificado
-        spaceBefore=5,
+        spaceBefore=2,
         spaceAfter=5
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_title_ope',
-        fontSize=24,
-        textColor="#C8A832",
-        fontName="Britannic-Bold",
-        leading=15,
+        fontSize=23.2,
+        textColor="#0F4761",
+        fontName="AMASIS-BOLD",
+        leading=10,
         alignment=1,  # justificado
         spaceBefore=5,
         spaceAfter=5
@@ -163,18 +163,19 @@ def estilos_parrafo():
     estilos.add(ParagraphStyle(
         name='la_esperanza_num_ope',
         fontSize=28,
-        textColor="#FFFFFF",
+        textColor="#EE0000",
         fontName="Britannic-Bold",
         leading=20,
-        alignment=0,  # justificado
+        alignment=2,  # justificado
         spaceBefore=0,
-        spaceAfter=10
+        spaceAfter=10,
+        rightIndent=20
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_parrafo',
-        fontSize=9,
+        fontSize=10,
         textColor=colors.black,
-        fontName="Britannic-Bold",
+        fontName="ABADI",
         leading=10,
         alignment=0,  # justificado
         spaceBefore=0,
@@ -184,21 +185,21 @@ def estilos_parrafo():
         name='la_esperanza_campos_firma',
         fontSize=9,
         textColor=colors.black,
-        fontName="Arial-Rounded-MT-Bold",
+        fontName="ABADI-BOLD",
         leading=0,
         alignment=1,  # justificado
-        spaceBefore=0,
-        spaceAfter=5
+        spaceBefore=5,
+        spaceAfter=10
     ))
     estilos.add(ParagraphStyle(
         name='la_esperanza_firma_alc',
         fontSize=9,
         textColor=colors.white,
-        fontName="Arial-Rounded-MT-Bold",
+        fontName="ABADI-BOLD",
         leading=0,
         alignment=1,  # justificado
-        spaceBefore=0,
-        spaceAfter=5
+        spaceBefore=5,
+        spaceAfter=10
     ))
     estilos.add(ParagraphStyle(
         name='horario',
@@ -206,7 +207,7 @@ def estilos_parrafo():
         textColor=colors.red,
         fontName="Times-Roman",
         leading=0,
-        alignment=0,  # justificado
+        alignment=1,  # justificado
         spaceBefore=5,
         spaceAfter=5
     ))
@@ -220,7 +221,7 @@ def estilos_parrafo():
         underline=True,
         fontName="Times-Roman",
         leading=0,
-        alignment=0,  # justificado
+        alignment=1,  # justificado
         spaceBefore=0,
         spaceAfter=0
     ))

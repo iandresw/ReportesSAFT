@@ -15,7 +15,7 @@ class PermisoOperacionReposirory:
         query = """
             SELECT Tra_PermOP.NumRecibo, Tra_PermOP.Identidad, Tra_PermOP.NoPermiso,  Contribuyente.Direccion,  Contribuyente.IdRepresentante, Tra_PermOP.Periodo, Tra_PermOP.Negocio, Tra_PermOP.Propietario,
                 Tra_PermOP.Ubicacion, Tra_PermOP.Actividad, Tra_PermOP.Usuario, Tra_PermOP.FirmaJ , Tra_PermOP.UsuarioMod, Contribuyente.CodProfesion, Contribuyente.FechaNac, Contribuyente.ClaveCatastro, Tra_PermOP.Observacion,
-                Contribuyente.rtn, Tra_PermOP.CodAldea, Contribuyente.idrepresentante , Contribuyente.Telefono , Tra_PermOP.Fecha
+                Contribuyente.rtn, Tra_PermOP.CodAldea, Contribuyente.idrepresentante , Contribuyente.Telefono , Tra_PermOP.Fecha,  Tra_PermOP.HorarioAlcohol
             FROM Tra_PermOP INNER JOIN 
             Contribuyente ON Tra_PermOP.Identidad = Contribuyente.Identidad 
             WHERE  Tra_PermOP.NumRecibo = ?
@@ -62,9 +62,9 @@ class PermisoOperacionReposirory:
                 row = cur.fetchone()
                 if not row:
                     return []
-                columns = [column[0] for column in cur.description]
-                self.update_ult_po(columns[0]+1)
-                return dict(zip(columns, row))
+
+                self.update_ult_po(int(row[0])+1)
+                return int(row[0])+1
         except Exception as e:
             print(f"Error Consultar ParametroCont: {e}")
             try:
@@ -88,13 +88,13 @@ class PermisoOperacionReposirory:
         except Exception as e:
             return False
 
-    def insertar_tra_perm_ope(self, NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario):
-        query = """INSERT INTO Tra_PermOP (NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario) 
-        VALUES (?, ?, ?, ?, ?, ?, ?,  ?,  ?, ?, ?, ?, ?) """
+    def insertar_tra_perm_ope(self, NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario, horario):
+        query = """INSERT INTO Tra_PermOP (NoPermiso, Periodo, Identidad, Negocio, Propietario, Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario, HorarioAlcohol) 
+        VALUES (?, ?, ?, ?, ?, ?, ?,  ?,  ?, ?, ?, ?, ?, ?) """
         try:
             with self.conexion.cursor() as cur:
                 cur.execute(query, (NoPermiso, Periodo, Identidad, Negocio, Propietario,
-                            Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario))
+                            Ubicacion, Actividad,  Observacion,  Fecha, CodAldea, NumRecibo, FirmaJ, Usuario, horario))
                 return True
         except Exception as e:
             return False

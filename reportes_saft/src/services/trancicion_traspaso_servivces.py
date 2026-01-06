@@ -276,24 +276,33 @@ class TrancicionTraspasoService:
         df_inicio = pd.DataFrame(dic_inicio)
 
         df_final = pd.DataFrame(dic_final)
+        fila = []
+        if len(df_inicio) == 0:
+            columa = ['Cuenta', 'Total']
+            for row in df_final.itertuples(index=False):
+                fila.append({'Cuenta': row.Cuenta, 'Total': 0})
+            df_inicio = pd.DataFrame(fila, columns=columa)
 
-        df = df_inicio.merge(df_final, on="Cuenta", how="right")
-        df = df.fillna(0)
+        df = df_inicio.merge(df_final, on='Cuenta', how="right")
+        if len(df) == 0:
+            data_sp = []
 
-        for _, data_s in df.iterrows():
-            cuenta = data_s['Cuenta']
-            tipo = cta_sp.get(cuenta, "Servicio desconocido")
-            if tipo == "Servicio desconocido":
-                continue
-            val_inicio = int(data_s.get('Total_x', data_s.get('Total_x', 0)))
-            val_final = data_s.get('Total_y', 0)
+        else:
+            for _, data_s in df.iterrows():
+                cuenta = data_s['Cuenta']
+                tipo = cta_sp.get(cuenta, "Servicio desconocido")
+                if tipo == "Servicio desconocido":
+                    continue
+                val_inicio = int(data_s.get(
+                    'Total_x', data_s.get('Total_x', 0)))
+                val_final = data_s.get('Total_y', 0)
 
-            data_sp.append({
-                'Cuenta': cuenta,
-                'Tipo': tipo,
-                'Valor_inicio': val_inicio,
-                'Valor_final': val_final
-            })
+                data_sp.append({
+                    'Cuenta': cuenta,
+                    'Tipo': tipo,
+                    'Valor_inicio': val_inicio,
+                    'Valor_final': val_final
+                })
 
         if not data:
             raise ValueError(
